@@ -111,7 +111,10 @@ class Motor(Actor):
 class StepperMotor(Motor):
     def __init__(self, id, parent=None):
         Motor.__init__(self,id,parent)
+        self.GradPerStep = 17
     def Step(self,Steps,Direction): pass
+    def Rotate(self,Grad,Direction): 
+        return self.Step(round(Grad/(self.StepsPerRotation/360)),Direction)
 class ServoActor(Motor):
     def __init__(self, id, parent=None):
         Motor.__init__(self,id,parent)
