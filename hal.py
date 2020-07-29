@@ -100,9 +100,17 @@ class ColorSensor(Sensor):
         r,g,b,a = self.Color()
         ret = str(self._id)+' Color:'+str(r)+','+str(g)+','+str(b)+','+str(a)+','+' RGBA'
         return  ret
-class ServoActor(Actor):
+class MotorActor(Actor):
     def __init__(self, id, parent=None):
         Actor.__init__(self,id,parent)
+    def Rotate(self,Grad,Direction): pass
+class StepperMotorActor(MotorActor):
+    def __init__(self, id, parent=None):
+        Actor.__init__(self,id,parent)
+    def Step(self,Steps,Direction): pass
+class ServoActor(MotorActor):
+    def __init__(self, id, parent=None):
+        MotorActor.__init__(self,id,parent)
         self.ServoBasePosition = {}
         self.Names = {}
     def setName(self,port,Name):
