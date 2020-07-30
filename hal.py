@@ -192,30 +192,6 @@ class GPIOActor(Actor):
         pass
     def input(self,port):
         return None
-class Programmer(Module):
-    """Generisches Programmiergert, holt DeviceSettings aus IC Bibliothek von plannedtests damit Unterklassen Controller Parameter Zentral zur Verfügung haben
-    """
-    def __init__(self, id, parent=None):
-        Actor.__init__(self,id,parent)
-        self.DeviceSettings = None
-    def ConnectToCPU(self,Type,Speed):
-        self.DeviceSettings = model.DeviceSettings(Type)
-        if self.DeviceSettings is None:
-            self.LastError = 'Unknown MCU/CPU'
-        return False
-    def Enable(self): return False
-    def Disable(self): return False
-    def LoadFile(self,Filename): pass
-    def PatchSerial(self,Serial,Typ,Adress): pass
-class ControllableProgrammer(Programmer): 
-    """ Programmiergeräte Klasse, die die Möglichkeit hat Controller zu steuern (Boundary Scan, OpenOCD Register/oder eigene Firmware)
-    """
-    def SetPin(self,Port,Pin,Status):
-        return False
-    def ReadPin(self,Port,Pin):
-        return False
-    def CallFunction(self,Function,Parameters):
-        return False
 class BusController(Module): pass
 class IPBusController(BusController):
     def SwitchBusOn(Port,On): pass
