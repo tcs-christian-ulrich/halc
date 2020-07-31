@@ -192,6 +192,15 @@ class GPIOActor(Actor):
         pass
     def input(self,port):
         return None
+class Compass(Sensor): 
+    def getMagnet():
+        pass
+    def getBearing():
+        pass
+    def Enable():
+        pass
+    def Disable():
+        pass
 class BusController(Module): pass
 class IPBusController(BusController):
     def SwitchBusOn(Port,On): pass
