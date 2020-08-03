@@ -105,6 +105,7 @@ class Motor(Actor):
     ANTICLOCKWISE = 1
     def __init__(self, id, parent=None):
         Actor.__init__(self,id,parent)
+        self.IsMoving = False
     def Rotate(self,Grad,Direction): pass
     def Enable(self): pass
     def Disable(self): pass
@@ -113,8 +114,11 @@ class StepperMotor(Motor):
         Motor.__init__(self,id,parent)
         self.GradPerStep = 17
     def Step(self,Steps,Direction): pass
-    def Rotate(self,Grad,Direction): 
-        return self.Step(round(Grad/(self.StepsPerRotation/360)),Direction)
+    def Rotate(self,Grad):
+        if Grad < 0:
+            return self.Step(round(-(Grad)/self.GradPerStep),0)
+        else:
+            return self.Step(round( (Grad)/self.GradPerStep),1)
 class ServoActor(Motor):
     def __init__(self, id, parent=None):
         Motor.__init__(self,id,parent)
