@@ -100,19 +100,62 @@ class ColorSensor(Sensor):
         r,g,b,a = self.Color()
         ret = str(self._id)+' Color:'+str(r)+','+str(g)+','+str(b)+','+str(a)+','+' RGBA'
         return  ret
+class MotorController(threading.Thread):
+    def __init__(self, id, parent=None):
+        Actor.__init__(self,id,parent)
+        self.Actions = []
+        self._updating = False
+        self._steps = 0
+        self._step_time = 0.01
+        self.start()
+    def Clear(self):
+        self.Actions = []
+        self._steps = 0
+    def Calculate(self):
+        pass
+    def BeginUpdate(self):
+        self._updating = True
+    def EndUpdate(self):
+        self._updating = False
+        self.Calculate()
+    def add(self,Action):
+        self.Actions.add(Action)
+        if not _updating:
+            self.Calculate()
+    def run(self):
+        while threading.main_thread().isAlive():
+            if self._steps > 0:
+                for Action in Actions:
+                    Action.Step(self)
+                time.sleep(self._step_time)
+            else:
+                time.sleep(0.1)
+class MotorAction:
+    def __init__(self,Motor):
+        self.Motor = Motor
+    def Step(self): pass
+class Movement(MotorAction):
+    def __init__(self,Motor,Value,Time=None):
+        MotorAction.__init__(self,Motor)
+        self.Time = Time
+        self.Value = Value
+class RampMovement(Movement)
+    def __init__(self,Motor,Value,Time=None,InitialSpeed=0.0,FinalSpeed=1.0):
+        Movement.__init__(self,Motor,Value,Time)
+        self.InitialSpeed = InitialSpeed
+        self.FinalSpeed = FinalSpeed
 class Motor(Actor):
     CLOCKWISE = 0
     ANTICLOCKWISE = 1
     def __init__(self, id, parent=None):
         Actor.__init__(self,id,parent)
         self.IsMoving = False
-    def Rotate(self,Grad,Direction): pass
     def Enable(self): pass
     def Disable(self): pass
 class StepperMotor(Motor):
     def __init__(self, id, parent=None):
         Motor.__init__(self,id,parent)
-        self.GradPerStep = 17
+        self.GradPerStep = 1.8
     def Step(self,Steps,Direction): pass
     def Rotate(self,Grad):
         if Grad < 0:
