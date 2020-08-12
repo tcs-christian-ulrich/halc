@@ -103,6 +103,7 @@ class ColorSensor(Sensor):
 class MotorController(threading.Thread):
     def __init__(self, id, parent=None):
         Actor.__init__(self,id,parent)
+        threading.Thread.__init__(self)
         self.Actions = []
         self._updating = False
         self._steps = 0
@@ -112,20 +113,30 @@ class MotorController(threading.Thread):
         self.Actions = []
         self._steps = 0
     def Calculate(self):
-        pass
+        _fastestMotor = None
+        for Action in self.Actions:
+            if _fastestMotor == None or Action.Motor.StepTime < _fastestMotor.StepTime:
+                _fastestMotor = Action.Motor
+        if _fastestMotor is not None:
+            self._step_time = _fastestMotor.StepTime
     def BeginUpdate(self):
         self._updating = True
     def EndUpdate(self):
         self._updating = False
         self.Calculate()
     def add(self,Action):
-        self.Actions.add(Action)
-        if not _updating:
+        self.Actions.append(Action)
+        if not self._updating:
+            self.Calculate()
+    def addAfter(self,Action):
+        self.Actions.append(Action)
+        Action.Depends = self.Actions[self.Actions.length()]
+        if not self._updating:
             self.Calculate()
     def run(self):
         while threading.main_thread().isAlive():
             if self._steps > 0:
-                for Action in Actions:
+                for Action in self.Actions:
                     Action.Step(self)
                 time.sleep(self._step_time)
             else:
@@ -133,13 +144,14 @@ class MotorController(threading.Thread):
 class MotorAction:
     def __init__(self,Motor):
         self.Motor = Motor
+        self.Depends = None
     def Step(self): pass
 class Movement(MotorAction):
     def __init__(self,Motor,Value,Time=None):
         MotorAction.__init__(self,Motor)
         self.Time = Time
         self.Value = Value
-class RampMovement(Movement)
+class RampMovement(Movement):
     def __init__(self,Motor,Value,Time=None,InitialSpeed=0.0,FinalSpeed=1.0):
         Movement.__init__(self,Motor,Value,Time)
         self.InitialSpeed = InitialSpeed
@@ -156,6 +168,8 @@ class StepperMotor(Motor):
     def __init__(self, id, parent=None):
         Motor.__init__(self,id,parent)
         self.GradPerStep = 1.8
+        #800RPM Speed for NEMA17
+        self.StepTime = (60/800)/(360/self.GradPerStep)
     def Step(self,Steps,Direction): pass
     def Rotate(self,Grad):
         if Grad < 0:
