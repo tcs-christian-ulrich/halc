@@ -134,7 +134,7 @@ class MotorController(threading.Thread):
         if not self._updating:
             self.Calculate()
     def run(self):
-        while threading.main_thread().isAlive():
+        while threading.main_thread().is_alive():
             if self._steps > 0:
                 for Action in self.Actions:
                     Action.Step(self)
@@ -145,12 +145,20 @@ class MotorAction:
     def __init__(self,Motor):
         self.Motor = Motor
         self.Depends = None
-    def Step(self): pass
+    def Step(self):
+        pass
 class Movement(MotorAction):
     def __init__(self,Motor,Value,Time=None):
         MotorAction.__init__(self,Motor)
         self.Time = Time
         self.Value = Value
+    def Step(self):
+        print("Step called")
+        if Value < 0:
+            dir = self.Motor.ANTICLOCKWISE
+        else:
+            dir = self.Motor.CLOCKWISE
+        self.Motor.Step(1,dir)
 class RampMovement(Movement):
     def __init__(self,Motor,Value,Time=None,InitialSpeed=0.0,FinalSpeed=1.0):
         Movement.__init__(self,Motor,Value,Time)
