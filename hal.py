@@ -117,6 +117,9 @@ class MotorController(threading.Thread):
         for Action in self.Actions:
             if _fastestMotor == None or Action.Motor.StepTime < _fastestMotor.StepTime:
                 _fastestMotor = Action.Motor
+            Action.Position = 0
+            if self._steps < Action.Value/Action.ValuePerStep:
+                self._steps = Action.Value/Action.ValuePerStep
         if _fastestMotor is not None:
             self._step_time = _fastestMotor.StepTime
     def BeginUpdate(self):
@@ -137,7 +140,7 @@ class MotorController(threading.Thread):
         while threading.main_thread().is_alive():
             if self._steps > 0:
                 for Action in self.Actions:
-                    Action.Step(self)
+                    Action.Step()
                 time.sleep(self._step_time)
             else:
                 time.sleep(0.1)
@@ -145,20 +148,24 @@ class MotorAction:
     def __init__(self,Motor):
         self.Motor = Motor
         self.Depends = None
-    def Step(self):
+        self.Position = 0
+        self.ValuePerStep = 1
+    def Step(self,Steps=1.0):
+        self.Position += Steps*self.ValuePerStep
         pass
 class Movement(MotorAction):
     def __init__(self,Motor,Value,Time=None):
         MotorAction.__init__(self,Motor)
         self.Time = Time
         self.Value = Value
-    def Step(self):
-        print("Step called")
         if Value < 0:
-            dir = self.Motor.ANTICLOCKWISE
+            self.Dir = self.Motor.ANTICLOCKWISE
         else:
-            dir = self.Motor.CLOCKWISE
-        self.Motor.Step(1,dir)
+            self.Dir = self.Motor.CLOCKWISE
+        self.ValuePerStep = self.Motor.GradPerStep
+    def Step(self,Steps=1.0):
+        MotorAction.Step(self,Steps)
+        self.Motor.Step(Steps,self.Dir)
 class RampMovement(Movement):
     def __init__(self,Motor,Value,Time=None,InitialSpeed=0.0,FinalSpeed=1.0):
         Movement.__init__(self,Motor,Value,Time)
