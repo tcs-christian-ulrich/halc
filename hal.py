@@ -46,12 +46,22 @@ class Interface(Sensor):
     def write(self,prot):
         return False
 class Video(Sensor):
+    """ Video Capturing Base Class
+    Allows to capture single frames or sequences from an camera, grabber or other video source
+    The CaptureSequence function starts capturing and calls HandlerFunction for every captured frame
+    """
     def __str__(self):
         return Module.__str__(self)
+        self.Image = None
     def read(self):
         return None
+    def Capture(self):
+        return read(self)
+    def CaptureSequence(self,HandlerFunction): pass
+    def Stop(self): pass
 class Camera(Video):pass
 class Grabber(Video):pass
+class Scanner(Video):pass
 class ADC(Sensor):
     def Sample(self,Time):
         return False
