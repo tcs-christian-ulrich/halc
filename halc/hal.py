@@ -287,6 +287,21 @@ class Compass(Sensor):
         pass
     def Disable():
         pass
+class Programmer(Module):
+    """Generisches Programmiergert, holt DeviceSettings aus IC Bibliothek von plannedtests damit Unterklassen Controller Parameter Zentral zur Verfügung haben
+    """
+    def __init__(self, id, parent=None):
+        Actor.__init__(self,id,parent)
+        self.DeviceSettings = None
+    def ConnectToCPU(self,Type,Speed):
+        self.DeviceSettings = model.DeviceSettings(Type)
+        if self.DeviceSettings is None:
+            self.LastError = 'Unknown MCU/CPU'
+        return False
+    def Enable(self): return False
+    def Disable(self): return False
+    def LoadFile(self,Filename): pass
+    def PatchSerial(self,Serial,Typ,Adress): pass
 class BusController(Module): pass
 class IPBusController(BusController):
     def SwitchBusOn(Port,On): pass
