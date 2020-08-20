@@ -1,4 +1,6 @@
-import unittest,hal,time
+import os,sys,unittest,time
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from halc import hal
 class TestMotor(hal.StepperMotor):
     def __init__(self, id, parent=None):
         hal.StepperMotor.__init__(self, id, parent=None)
