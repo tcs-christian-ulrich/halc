@@ -4,9 +4,9 @@ except: print("picamera package needs to be installed !")
 class PICamera(hal.Camera):
     def __init__(self, port=-1, parent=None,Name=None):
         if port == -1:
-            sensors.Sensor.__init__(self,'default',parent)
+            hal.Sensor.__init__(self,'default',parent)
         else:
-            sensors.Sensor.__init__(self,str(port),parent)
+            hal.Sensor.__init__(self,str(port),parent)
         self.Port = port
         self.Name = Name
     def read(self,CloseCapture = False):

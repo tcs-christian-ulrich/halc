@@ -3,9 +3,9 @@ import time,json,threading,numpy as np,os,logging,pyudev,usb.core
 class MPCamera(hal.Grabber):
     def __init__(self, port=-1, parent=None,Name=None):
         if port == -1:
-            sensors.Sensor.__init__(self,'default',parent)
+            hal.Grabber.__init__(self,'default',parent)
         else:
-            sensors.Sensor.__init__(self,str(port),parent)
+            hal.Grabber.__init__(self,str(port),parent)
         self.Port = port
         self.Name = Name
     def capture(self,dev,CloseCapture = False):
@@ -42,7 +42,7 @@ class mpEnumerate(threading.Thread):
                 try:
                     dev = pyudev.Devices.from_device_file(context, '/dev/video'+str(i))
                     if dev is not None:
-                        adev = sensors.Devices.find('/dev/video'+str(i),sensors.Video)
+                        adev = hal.Devices.find('/dev/video'+str(i),hal.Video)
                         if adev == None:
                             if dev.get('ID_USB_DRIVER').lower() == 'stk1160':
                                 cam = MPCamera(i,Name=dev.get('ID_MODEL'))

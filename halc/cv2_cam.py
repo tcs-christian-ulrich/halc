@@ -1,11 +1,13 @@
 from . import hal
-import cv2,atexit,time,json,threading,numpy as np,os,logging,pyudev,usb.core
+try: import cv2
+except: print('cv2 must be installed to use this module !')
+import atexit,time,json,threading,numpy as np,os,logging,pyudev,usb.core
 class OpenCVCamera(hal.Camera):
     def __init__(self, port=-1, parent=None,Name=None,VID=0x05a3,PID=0x9520):
         if port == -1:
-            sensors.Sensor.__init__(self,'default',parent)
+            hal.Sensor.__init__(self,'default',parent)
         else:
-            sensors.Sensor.__init__(self,str(port),parent)
+            hal.Sensor.__init__(self,str(port),parent)
         self.Port = port
         self.cap = None
         self.Params = None
@@ -114,7 +116,7 @@ class opencvEnumerate(threading.Thread):
                 try:
                     dev = pyudev.Devices.from_device_file(context, '/dev/video'+str(i))
                     if dev is not None:
-                        adev = sensors.Devices.find('/dev/video'+str(i),sensors.Video)
+                        adev = hal.Devices.find('/dev/video'+str(i),hal.Video)
                         if adev == None:
                             if dev.get('ID_USB_DRIVER') == 'uvcvideo' and dev.get('ID_MODEL').lower()!='stk1160':
                                 cap = cv2.VideoCapture('/dev/video'+str(i))
@@ -128,7 +130,7 @@ class opencvEnumerate(threading.Thread):
                             adev.Found = True
                 except:
                     pass
-            for dev in sensors.Devices.Modules:
+            for dev in hal.Devices.Modules:
                 if isinstance(dev,OpenCVCamera):
                     if dev.Found == False:
                         del(dev)
