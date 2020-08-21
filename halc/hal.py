@@ -152,6 +152,7 @@ class MotorController(threading.Thread):
                 for Action in self.Actions:
                     Action.Step()
                 time.sleep(self._step_time)
+                self._steps-=1
             else:
                 time.sleep(0.1)
 class MotorAction:
@@ -162,7 +163,6 @@ class MotorAction:
         self.ValuePerStep = 1
     def Step(self,Steps=1.0):
         self.Position += Steps*self.ValuePerStep
-        pass
 class Movement(MotorAction):
     def __init__(self,Motor,Value,Time=None):
         MotorAction.__init__(self,Motor)
