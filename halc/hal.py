@@ -294,7 +294,10 @@ class Programmer(Module):
         Actor.__init__(self,id,parent)
         self.DeviceSettings = None
     def ConnectToCPU(self,Type,Speed):
-        self.DeviceSettings = model.DeviceSettings(Type)
+        try:
+            self.DeviceSettings = model.DeviceSettings(Type)
+        except:
+            pass 
         if self.DeviceSettings is None:
             self.LastError = 'Unknown MCU/CPU'
         return False

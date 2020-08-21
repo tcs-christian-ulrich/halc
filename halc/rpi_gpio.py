@@ -8,7 +8,7 @@ class rpiGPIO(hal.GPIOActor):
         GPIO.setwarnings(False)
         GPIO.setup(0,GPIO.IN)
         GPIO.input(0)
-        sensors.GPIOActor.__init__(self,id,parent)
+        hal.GPIOActor.__init__(self,id,parent)
     def setup(self,port,direction):
         try:
             pin = self.getPin(port)
