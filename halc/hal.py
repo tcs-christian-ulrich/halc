@@ -148,13 +148,15 @@ class MotorController(threading.Thread):
             self.Calculate()
     def run(self):
         while threading.main_thread().is_alive():
-            if self._steps > 0:
+            fst = 0.3
+            if len(self.Actions) > 0:
                 for Action in self.Actions:
-                    Action.Step()
-                time.sleep(self._step_time)
-                self._steps-=1
-            else:
-                time.sleep(0.1)
+                    st = Action.Step()
+                    if Action.Done():
+                        del(Action)
+                    if st < fst:
+                        fst = st
+            time.sleep(fst)
 class MotorAction:
     def __init__(self,Motor):
         self.Motor = Motor
@@ -163,6 +165,8 @@ class MotorAction:
         self.ValuePerStep = 1
     def Step(self,Steps=1.0):
         self.Position += Steps*self.ValuePerStep
+    def Done(self):
+        return True
 class Movement(MotorAction):
     def __init__(self,Motor,Value,Time=None):
         MotorAction.__init__(self,Motor)
@@ -175,12 +179,13 @@ class Movement(MotorAction):
         self.ValuePerStep = self.Motor.GradPerStep
     def Step(self,Steps=1.0):
         MotorAction.Step(self,Steps)
-        self.Motor.Step(Steps,self.Dir)
-class RampMovement(Movement):
-    def __init__(self,Motor,Value,Time=None,InitialSpeed=0.0,FinalSpeed=1.0):
-        Movement.__init__(self,Motor,Value,Time)
-        self.InitialSpeed = InitialSpeed
-        self.FinalSpeed = FinalSpeed
+        mt = self.Motor.Step(Steps,self.Dir)
+        return mt # Step Time
+    def Done(self):
+        if Value > 0:
+            return self.Position>Value
+        else:
+            return self.Position<Value
 class Motor(Actor):
     CLOCKWISE = 0
     ANTICLOCKWISE = 1
