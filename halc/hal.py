@@ -179,6 +179,35 @@ class Movement(MotorAction):
             return self.Position>Value
         else:
             return self.Position<Value
+class Axis(Actor):
+    def __init__(self,id,Motor,MotorController,Transmission=1,parent=None)
+        Actor.__init__(self,id,parent)
+        self.Motor = Motor
+        self.MotorController = MotorController
+        self.Transmission = Transmission
+        self.Position = 0
+        self.newPosition = 0
+    def Move(self,Value):
+        self.newPosition = self.newPosition+Value
+        #TODO:abort Movements in Motorcontroller,add new Movement for self.Position-self.NewPosition
+    def Step(self,Steps,Direction):
+        self.Motor.Steps(Steps*Transmission,Direction)
+        if Direction == self.Motor.CLOCKWISE:
+            self.Position += Steps*Transmission
+        else:
+            self.Position -= Steps*Transmission
+class LinearAxis(Axis)
+    def __init__(self,id,Motor,MotorController,Transmission=1,parent=None,Min=0,Max=None)
+        Axis.__init__(self,id,Motor,MotorController,Transmission,parent)
+        self.Min = Min
+        self.Max = Max
+class RotationAxis(Axis):
+    def __init__(self,Motor,MotorController,Transmission=1,parent=None,Min=0,Max=360)
+        Axis.__init__(Motor,MotorController,Transmission,parent)
+        self.Min = Min
+        self.Max = Max
+    def Rotate(self,Value):
+        if self.Position+Value>self.Max:
 class Motor(Actor):
     CLOCKWISE = 0
     ANTICLOCKWISE = 1
