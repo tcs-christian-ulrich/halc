@@ -134,7 +134,7 @@ class MotorController(threading.Thread):
         Action.Depends = self.Actions[self.Actions.length()]
     def run(self):
         while threading.main_thread().is_alive():
-            fst = 0.3
+            fst = 0.05
             if len(self.Actions) > 0:
                 for Action in self.Actions:
                     st = Action.Step()
@@ -148,18 +148,25 @@ class MotorAction:
         self.Motor = Motor
         self.Depends = None
         self.Position = 0
+        self.Value = None
+        self.DoAbort = False
         self.ValuePerStep = 1
     def Step(self,Steps=1.0):
         self.Position += Steps*self.ValuePerStep
     def Done(self):
-        return True
+        if self.Position is not None:
+            return self.Position > self.Value
+        else:
+            return self.DoAbort
+    def Abort(self):
+        self.DoAbort = True
 class Movement(MotorAction):
     """
     Speed: Endspeed in RPM (Max Motor RPM when None)
     Time: Time to Move (Endless when None)
     Acceleration: Accelerate Speed till Speed/maxRPM is reached
     """
-    def __init__(self,Motor,Value,Speed=None,Time=None,Acceleration=None):
+    def __init__(self,Motor,Value=None,Speed=None,Time=None,Acceleration=None):
         MotorAction.__init__(self,Motor)
         self.Time = Time
         self.Value = Value
@@ -168,46 +175,47 @@ class Movement(MotorAction):
         else:
             self.Dir = self.Motor.CLOCKWISE
         self.ValuePerStep = self.Motor.GradPerStep
+        self.Acceleration = Acceleration
+        self.Speed = Speed
     def Step(self,Steps=1.0):
         MotorAction.Step(self,Steps)
-        if Acceleration is not None:
+        if self.Acceleration is not None:
             self.Motor.Speed(self.Motor.Speed()*Acceleration)
         mt = self.Motor.Step(Steps,self.Dir)
         return mt # Step Time
-    def Done(self):
-        if Value > 0:
-            return self.Position>Value
-        else:
-            return self.Position<Value
 class Axis(Actor):
-    def __init__(self,id,Motor,MotorController,Transmission=1,parent=None)
+    def __init__(self,id,Motor,MotorController,Transmission=1,parent=None):
         Actor.__init__(self,id,parent)
         self.Motor = Motor
         self.MotorController = MotorController
         self.Transmission = Transmission
         self.Position = 0
         self.newPosition = 0
-    def Move(self,Value):
+    def Move(self,Value=None,Speed=None,Time=None,Acceleration=None):
         self.newPosition = self.newPosition+Value
-        #TODO:abort Movements in Motorcontroller,add new Movement for self.Position-self.NewPosition
+        for Action in self.MotorController.Actions:
+            if Action.Motor == self.Motor:
+                Action.Abort()
+        self.MotorController.add(Movement(self.Motor,Value,Speed,Time,Acceleration))
     def Step(self,Steps,Direction):
         self.Motor.Steps(Steps*Transmission,Direction)
         if Direction == self.Motor.CLOCKWISE:
             self.Position += Steps*Transmission
         else:
             self.Position -= Steps*Transmission
-class LinearAxis(Axis)
-    def __init__(self,id,Motor,MotorController,Transmission=1,parent=None,Min=0,Max=None)
+class LinearAxis(Axis):
+    def __init__(self,id,Motor,MotorController,Transmission=1,parent=None,Min=0,Max=None):
         Axis.__init__(self,id,Motor,MotorController,Transmission,parent)
         self.Min = Min
         self.Max = Max
 class RotationAxis(Axis):
-    def __init__(self,Motor,MotorController,Transmission=1,parent=None,Min=0,Max=360)
+    def __init__(self,Motor,MotorController,Transmission=1,parent=None,Min=0,Max=360):
         Axis.__init__(Motor,MotorController,Transmission,parent)
         self.Min = Min
         self.Max = Max
     def Rotate(self,Value):
         if self.Position+Value>self.Max:
+            pass
 class Motor(Actor):
     CLOCKWISE = 0
     ANTICLOCKWISE = 1

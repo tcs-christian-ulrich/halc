@@ -6,22 +6,37 @@ class TestMotor(hal.StepperMotor):
         hal.StepperMotor.__init__(self, id, parent=None)
         self.Position = 0
     def Step(self,Steps,Direction):
-        if Direction>0:
+        #print("TestMotor.Step")
+        if Direction==0:
             self.Position += Steps*self.GradPerStep
         else:
             self.Position -= Steps*self.GradPerStep
         return 0 # minimal time to next step
 class MotorTests(unittest.TestCase):
     def setUp(self):
-        self.mc = hal.MotorController('0')
-        self.motor = TestMotor('1')
+        self.mc = hal.MotorController('mc')
+        self.motor = TestMotor('mot')
     def test_LinearMovement(self):
-        self.mc.add(hal.Movement(self.motor,15))
-        time.sleep(0.0001)
-        self.assertLess(self.motor.Position,15)
+        self.mc.add(hal.Movement(self.motor,1))
+        time.sleep(0.06)
+        self.assertGreater(self.motor.Position,15)
     def test_LinearMovementBack(self):
         self.mc.add(hal.Movement(self.motor,-15))
-        time.sleep(0.0001)
-        self.assertEqual(self.motor.Position,0)
+        time.sleep(0.06)
+        self.assertLess(self.motor.Position,1)
+class MotorAxisTests(unittest.TestCase):
+    def setUp(self):
+        self.mc = hal.MotorController('mc')
+        self.motor = TestMotor('mot')
+        self.la = hal.LinearAxis('ax',self.motor,self.mc,Max=100)
+    def test_LinearMovement(self):
+        self.la.Move(50)
+        time.sleep(0.06)
+        self.assertGreater(self.motor.Position,50)
+    def test_LinearMovementBack(self):
+        self.la.Move(10)
+        time.sleep(0.06)
+        self.assertLess(self.motor.Position,10)
+        self.assertGreater(self.motor.Position,11)
 if __name__ == '__main__':
     unittest.main()
