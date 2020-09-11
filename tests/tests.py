@@ -16,11 +16,11 @@ class MotorTests(unittest.TestCase):
     def setUp(self):
         self.mc = hal.MotorController('mc')
         self.motor = TestMotor('mot')
-    def test_LinearMovement(self):
+    def _test_LinearMovement(self):
         self.mc.add(hal.Movement(self.motor,1))
         time.sleep(0.06)
         self.assertGreater(self.motor.Position,15)
-    def test_LinearMovementBack(self):
+    def _test_LinearMovementBack(self):
         self.mc.add(hal.Movement(self.motor,-15))
         time.sleep(0.06)
         self.assertLess(self.motor.Position,1)

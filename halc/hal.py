@@ -195,11 +195,11 @@ class Axis(Actor):
         self.Position = 0
         self.newPosition = 0
     def Move(self,Value=None,Speed=None,Time=None,Acceleration=None):
-        self.newPosition = self.newPosition+Value
+        self.newPosition = Value
         for Action in self.MotorController.Actions:
             if Action.Motor == self.Motor:
                 Action.Abort()
-        self.MotorController.add(Movement(self.Motor,Value,Speed,Time,Acceleration))
+        self.MotorController.add(Movement(self.Motor,Value-self.Position,Speed,Time,Acceleration))
     def Step(self,Steps,Direction):
         self.Motor.Steps(Steps*Transmission,Direction)
         if Direction == self.Motor.CLOCKWISE:
