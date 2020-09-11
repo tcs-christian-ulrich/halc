@@ -111,14 +111,15 @@ class ColorSensor(Sensor):
         ret = str(self._id)+' Color:'+str(r)+','+str(g)+','+str(b)+','+str(a)+','+' RGBA'
         return  ret
 class MotorController(threading.Thread):
-    def __init__(self, id, parent=None):
+    def __init__(self, id, parent=None, Autostart=True):
         Actor.__init__(self,id,parent)
         threading.Thread.__init__(self)
         self.Actions = []
         self._updating = False
         self._steps = 0
         self._step_time = 0.01
-        self.start()
+        if Autostart:
+            self.start()
     def Clear(self):
         self.Actions = []
         self._steps = 0
@@ -132,17 +133,19 @@ class MotorController(threading.Thread):
     def addAfter(self,Action):
         self.Actions.append(Action)
         Action.Depends = self.Actions[self.Actions.length()]
+    def step(self):
+        fst = 0.05
+        if len(self.Actions) > 0:
+            for Action in self.Actions:
+                st = Action.Step()
+                if Action.Done():
+                    del(Action)
+                if st < fst:
+                    fst = st
+        time.sleep(fst)
     def run(self):
         while threading.main_thread().is_alive():
-            fst = 0.05
-            if len(self.Actions) > 0:
-                for Action in self.Actions:
-                    st = Action.Step()
-                    if Action.Done():
-                        del(Action)
-                    if st < fst:
-                        fst = st
-            time.sleep(fst)
+            self.step()
 class MotorAction:
     def __init__(self,Motor):
         self.Motor = Motor
