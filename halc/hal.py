@@ -329,8 +329,13 @@ class Compass(Sensor):
     def Disable():
         pass
 class BusController(Module): pass
-class IPBusController(BusController):
+class IPInterface(BusController): pass
+class IPPOEInterface(BusController):
     def SwitchBusOn(Port,On): pass
+class IPWifiInterface(IPInterface):
+    def Scan(self): pass
+    def Connect(self,ssid,passphrase=None): pass
+    def Disconnect(self): pass
 class ABBusController(BusController): pass
 Devices = Module('/')
 def EnsureDevice(typ,name=None,WaitTime=0):
