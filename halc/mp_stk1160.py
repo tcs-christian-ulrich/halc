@@ -1,5 +1,5 @@
 from . import hal
-import time,json,threading,numpy as np,os,logging,pyudev,usb.core
+import time,json,threading,numpy as np,os,logging,pyudev,usb.core,cv2
 class MPCamera(hal.Grabber):
     def __init__(self, port=-1, parent=None,Name=None):
         if port == -1:
@@ -10,9 +10,9 @@ class MPCamera(hal.Grabber):
         self.Name = Name
     def capture(self,dev,CloseCapture = False):
         os.system("mplayer tv:// -tv driver=v4l2:device=/dev/video"+str(self.Port)+":input=1:fps=25 -hardframedrop -vf pp=lb -frames 1 -vo png")
-        img = cv2.imread("/home/pi/00000001.jpg")
-        if self.logger.getEffectiveLevel() > logging.DEBUG:
-            os.remove("/home/pi/00000001.jpg")
+        img = cv2.imread("/home/pi/00000001.png")
+        if self.logger.getEffectiveLevel() < logging.DEBUG:
+            os.remove("/home/pi/00000001.png")
         try:
             self.h,  self.w = img.shape[:2]
             cv2.resize(img,(1024,768))
