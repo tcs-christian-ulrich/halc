@@ -6,7 +6,7 @@ class TestMotor(hal.StepperMotor):
         hal.StepperMotor.__init__(self, id, parent=None)
         self.Position = 0
     def Step(self,Steps,Direction):
-        #print("TestMotor.Step")
+        print("TestMotor.Step "+str(Direction))
         if Direction==0:
             self.Position += Steps*self.GradPerStep
         else:
@@ -35,7 +35,7 @@ class MotorAxisTests(unittest.TestCase):
             self.mc.step()
         self.assertGreater(self.motor.Position,5)
     def test_LinearMovementBack(self):
-        self.la.Move(1)
+        self.la.Move(Speed=-0)
         for i in range(5):
             self.mc.step()
         self.assertLess(self.motor.Position,1)

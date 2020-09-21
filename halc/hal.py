@@ -154,10 +154,11 @@ class MotorAction:
         self.Value = None
         self.DoAbort = False
         self.ValuePerStep = 1
+        self.Position = 0
     def Step(self,Steps=1.0):
         self.Position += Steps*self.ValuePerStep
     def Done(self):
-        if self.Position is not None:
+        if self.Position is not None and self.Value is not None:
             return self.Position > self.Value
         else:
             return self.DoAbort
@@ -173,7 +174,8 @@ class Movement(MotorAction):
         MotorAction.__init__(self,Motor)
         self.Time = Time
         self.Value = Value
-        if Value < 0:
+        if Value is not None and Value < 0 \
+        or Speed is not None and Speed < 0:
             self.Dir = self.Motor.ANTICLOCKWISE
         else:
             self.Dir = self.Motor.CLOCKWISE
@@ -199,7 +201,11 @@ class Axis(Actor):
         for Action in self.MotorController.Actions:
             if Action.Motor == self.Motor:
                 Action.Abort()
-        self.MotorController.add(Movement(self.Motor,Value-self.Position,Speed,Time,Acceleration))
+        if Value is not None \
+        and self.Position is not None:
+            self.MotorController.add(Movement(self.Motor,Value-self.Position,Speed,Time,Acceleration))
+        else:
+            self.MotorController.add(Movement(self.Motor,None,Speed,Time,Acceleration))
     def Step(self,Steps,Direction):
         self.Motor.Steps(Steps*Transmission,Direction)
         if Direction == self.Motor.CLOCKWISE:
