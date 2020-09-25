@@ -1,6 +1,8 @@
 import logging,time,threading
 Devices = []
 class Module:
+    """ Base Module Class, all other halc Classed are an Module
+    """
     def find(self,id=None,typ=None,Name=None):
         for m in self.Modules:
             if  ((id is None) or (m._id==id) or (id in m._id))\
@@ -137,11 +139,13 @@ class MotorController(threading.Thread):
         fst = 0.05
         if len(self.Actions) > 0:
             for Action in self.Actions:
-                st = Action.Step()
                 if Action.Done():
+                    self.Actions.remove(Action)
                     del(Action)
-                if st < fst:
-                    fst = st
+                else:
+                    st = Action.Step()
+                    if st < fst:
+                        fst = st
         time.sleep(fst)
     def run(self):
         while threading.main_thread().is_alive():
@@ -159,7 +163,7 @@ class MotorAction:
         self.Position += Steps*self.ValuePerStep
     def Done(self):
         if self.Position is not None and self.Value is not None:
-            return self.Position > self.Value
+            return self.Position >= self.Value
         else:
             return self.DoAbort
     def Abort(self):

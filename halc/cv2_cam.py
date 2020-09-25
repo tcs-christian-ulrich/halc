@@ -1,6 +1,8 @@
 from . import hal
 try: import cv2
-except: print('cv2 must be installed to use this module !')
+except: 
+    print('cv2 must be installed to use this module !')
+    exit
 import atexit,time,json,threading,numpy as np,os,logging,pyudev,usb.core
 class OpenCVCamera(hal.Camera):
     def __init__(self, port=-1, parent=None,Name=None,VID=0x05a3,PID=0x9520):

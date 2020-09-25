@@ -16,11 +16,11 @@ class MotorTests(unittest.TestCase):
     def setUp(self):
         self.mc = hal.MotorController('mc')
         self.motor = TestMotor('mot')
-    def _test_LinearMovement(self):
+    def test_LinearMovement(self):
         self.mc.add(hal.Movement(self.motor,1))
-        time.sleep(0.06)
+        time.sleep(0.6)
         self.assertGreater(self.motor.Position,15)
-    def _test_LinearMovementBack(self):
+    def test_LinearMovementBack(self):
         self.mc.add(hal.Movement(self.motor,-15))
         time.sleep(0.06)
         self.assertLess(self.motor.Position,1)
@@ -29,16 +29,20 @@ class MotorAxisTests(unittest.TestCase):
         self.mc = hal.MotorController('mc',Autostart=False)
         self.motor = TestMotor('mot')
         self.la = hal.LinearAxis('ax',self.motor,self.mc,Max=100)
-    def test_LinearMovement(self):
+    def _test_AbsouluteMovement(self):
+        self.la.Move(9)
+        for i in range(7):
+            self.mc.step()
+        self.assertEqual(self.motor.Position,9)
+    def _test_LinearMovement(self):
         self.la.Move()
         for i in range(5):
             self.mc.step()
-        self.assertGreater(self.motor.Position,5)
-    def test_LinearMovementBack(self):
-        self.la.Move(Speed=-0)
+        self.assertEqual(self.motor.Position,9)
+    def _test_LinearMovementBack(self):
+        self.la.Move(Speed=-self.motor.maxRPM)
         for i in range(5):
             self.mc.step()
-        self.assertLess(self.motor.Position,1)
-        self.assertGreater(self.motor.Position,11)
+        self.assertEqual(self.motor.Position,-9)
 if __name__ == '__main__':
     unittest.main()
