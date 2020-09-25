@@ -1,3 +1,8 @@
 pyudev
 pyroute2
-pystemd
+#pystemd
+mkdocs
+#mkdocs-mermaid-plugin
+git+https://github.com/pugong/mkdocs-mermaid-plugin
+mkdocstrings
+mkdocs-material

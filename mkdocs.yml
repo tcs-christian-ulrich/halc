@@ -1,0 +1,8 @@
+site_name: halc
+theme:
+    name: "material"
+plugins:
+    - markdownmermaid
+    - mkdocstrings
+extra_javascript:
+    - https://unpkg.com/mermaid@7.1.2/dist/mermaid.min.js
