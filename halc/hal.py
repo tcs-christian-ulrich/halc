@@ -1,9 +1,11 @@
 import logging,time,threading
 Devices = []
 class Module:
-    """ Base Module Class, all other halc Classed are an Module
+    """ Base Module Class, all other halc Classes are an Module
     """
     def find(self,id=None,typ=None,Name=None):
+        """ With the find function you can search for Devices/Modules that are Childs of this Module
+        """
         for m in self.Modules:
             if  ((id is None) or (m._id==id) or (id in m._id))\
             and ((typ is None) or (isinstance(m,typ)))\
@@ -193,6 +195,10 @@ class Movement(MotorAction):
         mt = self.Motor.Step(Steps,self.Dir)
         return mt # Step Time
 class Axis(Actor):
+    """![](images/axis.jpg) is the Base class for an axis. 
+
+    An axis describes an object that have an destination value and can have also an gearing and drives an motor to reach this destination vaue with an MotorAction
+    """
     def __init__(self,id,Motor,MotorController,Transmission=1,parent=None):
         Actor.__init__(self,id,parent)
         self.Motor = Motor
@@ -381,6 +387,8 @@ def EnsureDevice(typ,name=None,WaitTime=0):
         logging.warning("**STEPEND OK")
     return True
 def showTree():
+    """ Shows the Device Tree as ASCII Tree
+    """
     try: 
         import pptree
         pptree.print_tree(Devices,"Modules")
