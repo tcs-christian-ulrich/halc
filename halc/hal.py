@@ -145,17 +145,13 @@ class MotorController(threading.Thread):
     def Clear(self):
         self.Actions = []
         self._steps = 0
-    def BeginUpdate(self):
-        self._updating = True
-    def EndUpdate(self):
-        self._updating = False
-        self.Calculate()
     def add(self,Action):
         self.Actions.append(Action)
-    def addAfter(self,Action):
-        self.Actions.append(Action)
-        Action.Depends = self.Actions[self.Actions.length()]
     def step(self):
+        """ This function is the main function to work all actions, it is called by the controller loop. 
+        
+        When you set Autostart to False in the initialisation parameters, you can call step manually.
+        """
         fst = 0.05
         if len(self.Actions) > 0:
             for Action in self.Actions:
@@ -168,6 +164,8 @@ class MotorController(threading.Thread):
                         fst = st
         time.sleep(fst)
     def run(self):
+        """ runs the controller loop
+        """
         while threading.main_thread().is_alive():
             self.step()
 class MotorAction:
