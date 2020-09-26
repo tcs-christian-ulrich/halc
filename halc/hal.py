@@ -37,15 +37,20 @@ class Module:
             ret = str(self._id)
         return  ret
 class Sensor(Module):
-    #Base class for all Sensors
+    """ Base class for all Sensors
+    """
     def __str__(self):
         return Module.__str__(self)
 class Actor(Module):
-    #Base class for all Actors
+    """Base class for all Actors
+    """
     def __str__(self):
         return Module.__str__(self)
 class Interface(Sensor):
-    #Base class for Interfaces - with Interfaces are Modules that makes it possible to access Busses or Hardware at example an RS232 Interface or an Sensor Plattform
+    """Base class for Interfaces 
+    
+    with Interfaces are Modules that makes it possible to access Busses or Hardware at example an RS232 Interface or an Sensor Plattform
+    """
     def __init__(self, id, parent=None):
         Sensor.__init__(self,id,parent)
         self.Lock = threading.Lock()
@@ -74,11 +79,13 @@ class Camera(Video):pass
 class Grabber(Video):pass
 class Scanner(Video):pass
 class ADC(Sensor):
-    #Base class to access analog voltages
+    """Base class to access analog voltage
+    """
     def Sample(self,Time):
         return False
 class DAC(Actor):
-    #Base class to generate analog voltages
+    """Base class to generate analog voltages
+    """
     def Output(self,Samples):
         return False
 class AudioADC(ADC):
@@ -164,7 +171,8 @@ class MotorController(threading.Thread):
         while threading.main_thread().is_alive():
             self.step()
 class MotorAction:
-    #Base class to drive an motot
+    """Base class to drive an motor
+    """
     def __init__(self,Motor):
         self.Motor = Motor
         self.Depends = None
@@ -177,13 +185,19 @@ class MotorAction:
         self.Position += Steps*self.ValuePerStep
     def Done(self):
         if self.Position is not None and self.Value is not None:
-            return self.Position >= self.Value
+            if self.Value > 0:
+                return self.Position >= self.Value
+            else:
+                return self.Position <= self.Value
         else:
             return self.DoAbort
     def Abort(self):
         self.DoAbort = True
 class Movement(MotorAction):
-    """
+    """Movement Class
+
+    This class moves an specific way, or endless and keeps track to do it in an specific time or accelerate below the given value
+
     Speed: Endspeed in RPM (Max Motor RPM when None)
     Time: Time to Move (Endless when None)
     Acceleration: Accelerate Speed till Speed/maxRPM is reached
@@ -373,7 +387,8 @@ class IPWifiInterface(IPInterface):
 class ABBusController(BusController): pass
 Devices = Module('/')
 def EnsureDevice(typ,name=None,WaitTime=0):
-    #Function to ensure (wait) for an Device or fails if the Device is not there within an given amount of time
+    """Function to ensure (wait) for an Device or fails if the Device is not there within an given amount of time
+    """
     WaitTime += 0.1
     FirstSearch = True
     while WaitTime>0:

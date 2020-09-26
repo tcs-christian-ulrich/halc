@@ -6,7 +6,7 @@ class TestMotor(hal.StepperMotor):
         hal.StepperMotor.__init__(self, id, parent=None)
         self.Position = 0
     def Step(self,Steps,Direction):
-        print("TestMotor.Step "+str(Direction))
+        #print("TestMotor.Step "+str(Direction))
         if Direction==0:
             self.Position += Steps*self.GradPerStep
         else:
@@ -16,30 +16,44 @@ class MotorTests(unittest.TestCase):
     def setUp(self):
         self.mc = hal.MotorController('mc')
         self.motor = TestMotor('mot')
+    def test_directLinearMovement(self):
+        mm = hal.Movement(self.motor,15)
+        for i in range(15):
+            mm.Step()
+            if mm.Done():
+                break
+        self.assertGreater(self.motor.Position,15)
+    def test_directLinearMovementBack(self):
+        mm = hal.Movement(self.motor,-15)
+        for i in range(15):
+            mm.Step()
+            if mm.Done():
+                break
+        self.assertLess(self.motor.Position,-15)
     def test_LinearMovement(self):
-        self.mc.add(hal.Movement(self.motor,1))
+        self.mc.add(hal.Movement(self.motor,15))
         time.sleep(0.6)
         self.assertGreater(self.motor.Position,15)
     def test_LinearMovementBack(self):
-        self.mc.add(hal.Movement(self.motor,-15))
-        time.sleep(0.06)
-        self.assertLess(self.motor.Position,1)
+        self.mc.add(hal.Movement(self.motor,-30))
+        time.sleep(0.6)
+        self.assertLess(self.motor.Position,-15)
 class MotorAxisTests(unittest.TestCase):
     def setUp(self):
         self.mc = hal.MotorController('mc',Autostart=False)
         self.motor = TestMotor('mot')
         self.la = hal.LinearAxis('ax',self.motor,self.mc,Max=100)
-    def _test_AbsouluteMovement(self):
+    def test_AbsouluteMovement(self):
         self.la.Move(9)
         for i in range(7):
             self.mc.step()
         self.assertEqual(self.motor.Position,9)
-    def _test_LinearMovement(self):
+    def test_LinearMovement(self):
         self.la.Move()
         for i in range(5):
             self.mc.step()
         self.assertEqual(self.motor.Position,9)
-    def _test_LinearMovementBack(self):
+    def test_LinearMovementBack(self):
         self.la.Move(Speed=-self.motor.maxRPM)
         for i in range(5):
             self.mc.step()
