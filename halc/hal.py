@@ -253,14 +253,25 @@ class LinearAxis(Axis):
         Axis.__init__(self,id,Motor,MotorController,Transmission,parent)
         self.Min = Min
         self.Max = Max
+        self.Overflow = False
+    def Move(self,Value=None,Speed=None,Time=None,Acceleration=None):
+        if self.Overflow:
+            #TODO: calculate overflow
+            Axis.Move(self,Value,Speed,Time,Acceleration)
+        else:
+            Axis.Move(self,Value,Speed,Time,Acceleration)
 class RotationAxis(Axis):
-    def __init__(self,Motor,MotorController,Transmission=1,parent=None,Min=0,Max=360):
-        Axis.__init__(Motor,MotorController,Transmission,parent)
-        self.Min = Min
-        self.Max = Max
-    def Rotate(self,Value):
-        if self.Position+Value>self.Max:
-            pass
+    def __init__(self,id,Motor,MotorController,Transmission=1,parent=None,Min=0,Max=360):
+        self.Offset = -((Max-Min)/2)
+        LinearAxis.__init__(self,id,Motor,MotorController,Transmission,parent,self.Offset+Min,self.Offset+Max)
+        self.Overflow = True
+    def Move(self,Value=None,Speed=None,Time=None,Acceleration=None):
+        if Value is not None:
+            LinearAxis.Move(self,Value+self.Offset,Speed,Time,Acceleration)
+        else:
+            LinearAxis.Move(self,None,Speed,Time,Acceleration)
+    def Rotate(self,Value,Speed=None,Time=None,Acceleration=None):
+        Move(self,Value,Speed,Time,Acceleration)
 class Motor(Actor):
     """ Base class to drive an Motor
     """
