@@ -5,6 +5,9 @@ class Module:
     """
     def find(self,id=None,typ=None,Name=None):
         """ With the find function you can search for Devices/Modules that are Childs of this Module
+
+        just call it with an hardware id of the Module (mac adress, usb vid/pid ...) or an Name (can be set on your own some modules may support names that are avalible in the hardware (e.g. eeprom))
+        or an device typ/class
         """
         for m in self.Modules:
             if  ((id is None) or (m._id==id) or (id in m._id))\
@@ -34,12 +37,15 @@ class Module:
             ret = str(self._id)
         return  ret
 class Sensor(Module):
+    #Base class for all Sensors
     def __str__(self):
         return Module.__str__(self)
 class Actor(Module):
+    #Base class for all Actors
     def __str__(self):
         return Module.__str__(self)
 class Interface(Sensor):
+    #Base class for Interfaces - with Interfaces are Modules that makes it possible to access Busses or Hardware at example an RS232 Interface or an Sensor Plattform
     def __init__(self, id, parent=None):
         Sensor.__init__(self,id,parent)
         self.Lock = threading.Lock()
@@ -51,6 +57,7 @@ class Interface(Sensor):
         return False
 class Video(Sensor):
     """ Video Capturing Base Class
+
     Allows to capture single frames or sequences from an camera, grabber or other video source
     The CaptureSequence function starts capturing and calls HandlerFunction for every captured frame
     """
@@ -67,9 +74,11 @@ class Camera(Video):pass
 class Grabber(Video):pass
 class Scanner(Video):pass
 class ADC(Sensor):
+    #Base class to access analog voltages
     def Sample(self,Time):
         return False
 class DAC(Actor):
+    #Base class to generate analog voltages
     def Output(self,Samples):
         return False
 class AudioADC(ADC):
@@ -115,6 +124,8 @@ class ColorSensor(Sensor):
         ret = str(self._id)+' Color:'+str(r)+','+str(g)+','+str(b)+','+str(a)+','+' RGBA'
         return  ret
 class MotorController(threading.Thread):
+    """ The MotorController drives Motors and Axes threaded 
+    """
     def __init__(self, id, parent=None, Autostart=True):
         Actor.__init__(self,id,parent)
         threading.Thread.__init__(self)
@@ -153,6 +164,7 @@ class MotorController(threading.Thread):
         while threading.main_thread().is_alive():
             self.step()
 class MotorAction:
+    #Base class to drive an motot
     def __init__(self,Motor):
         self.Motor = Motor
         self.Depends = None
@@ -236,6 +248,8 @@ class RotationAxis(Axis):
         if self.Position+Value>self.Max:
             pass
 class Motor(Actor):
+    """ Base class to drive an Motor
+    """
     CLOCKWISE = 0
     ANTICLOCKWISE = 1
     def __init__(self, id, parent=None):
@@ -313,6 +327,10 @@ class ServoActor(Motor):
                         There = False
                 time.sleep(0.1)
 class GPIOActor(Actor):
+    """Makes GPIO Pins accessable
+
+    You can set Names for every Pin and access it per Name or Pin Number
+    """
     def __init__(self, id, parent=None):
         Actor.__init__(self,id,parent)
         self.Names = {}
@@ -355,6 +373,7 @@ class IPWifiInterface(IPInterface):
 class ABBusController(BusController): pass
 Devices = Module('/')
 def EnsureDevice(typ,name=None,WaitTime=0):
+    #Function to ensure (wait) for an Device or fails if the Device is not there within an given amount of time
     WaitTime += 0.1
     FirstSearch = True
     while WaitTime>0:
