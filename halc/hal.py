@@ -161,12 +161,11 @@ class MotorController(threading.Thread):
     ```mermaid
     sequenceDiagram
         User->>Axis: Move(3)
-        MotorController->>Axis: step()
-        Axis->>Motor: step()
-        MotorController->>Axis: step()
-        Axis->>Motor: step()
-        MotorController->>Axis: step()
-        Axis->>Motor: step()
+        loop 3x
+            MotorController-->>Axis: step()
+            Axis->>Motor: step()
+        end
+        Axis->>MotorController: Done()
     ```
     """
     def __init__(self, id, parent=None, Autostart=True):
@@ -428,15 +427,29 @@ class Compass(Sensor):
     def Disable():
         pass
 class BusController(Module): pass
-class NetworkInterface(BusController): pass
+class NetworkInterface(BusController):
+    """ Basic Network Interface class
+    """
 class NetworkWifiInterface(NetworkInterface):
-    def Scan(self): pass
-    def Connect(self,ssid,passphrase=None): pass
-    def Disconnect(self): pass
-class NetworkDevice(Module):pass
+    """ Basic Network Wifi Interface Class
+    """
+    def Scan(self): 
+        """ Scans for Wifi Networks
+        """
+    def Connect(self,ssid,passphrase=None): 
+        """ Connect to an Wifi Network
+        """
+    def Disconnect(self): 
+        """ Disconnect from actial connected Wiki Network
+        """
+class NetworkDevice(Module):
+    """ Basic Network Device
+    """
 class NetworkSwitch(NetworkDevice):pass
 class NetworkPOESwitch(NetworkSwitch):
-    def SwitchBusOn(Port,On): pass
+    def SwitchPower(Port,On): 
+        """ Switches POE on specified Port on/off
+        """
 class ABBusController(BusController): pass
 Devices = Module('/')
 def EnsureDevice(typ,name=None,WaitTime=0):
