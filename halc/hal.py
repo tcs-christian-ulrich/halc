@@ -157,6 +157,17 @@ class ColorSensor(Sensor):
         return  ret
 class MotorController(threading.Thread):
     """ The MotorController drives Motors and Axes threaded 
+
+    ```mermaid
+    sequenceDiagram
+        User->>Axis: Move(3)
+        MotorController->>Axis: step()
+        Axis->>Motor: step()
+        MotorController->>Axis: step()
+        Axis->>Motor: step()
+        MotorController->>Axis: step()
+        Axis->>Motor: step()
+    ```
     """
     def __init__(self, id, parent=None, Autostart=True):
         Actor.__init__(self,id,parent)
@@ -244,8 +255,10 @@ class Movement(MotorAction):
         mt = self.Motor.Step(Steps,self.Dir)
         return mt # Step Time
 class Axis(Actor):
-    """![](images/axis.jpg) is the Base class for an axis. 
-
+    """is the Base class for an axis.
+    
+    ![](images/axis.jpg) 
+    
     An axis describes an object that have an destination value and can have also an gearing and drives an motor to reach this destination vaue with an MotorAction
     """
     def __init__(self,id,Motor,MotorController,Transmission=1,parent=None):
@@ -256,6 +269,8 @@ class Axis(Actor):
         self.Position = 0
         self.newPosition = 0
     def Move(self,Value=None,Speed=None,Time=None,Acceleration=None):
+        """ with this function the User can set an Target position ti any time (even during movement)
+        """
         self.newPosition = Value
         for Action in self.MotorController.Actions:
             if Action.Motor == self.Motor:
@@ -266,6 +281,8 @@ class Axis(Actor):
         else:
             self.MotorController.add(Movement(self.Motor,None,Speed,Time,Acceleration))
     def Step(self,Steps,Direction):
+        """ This function has to be called continously, normal that will be done threaded by MotorController bit it can be done also manually
+        """
         self.Motor.Steps(Steps*Transmission,Direction)
         if Direction == self.Motor.CLOCKWISE:
             self.Position += Steps*Transmission
@@ -411,13 +428,15 @@ class Compass(Sensor):
     def Disable():
         pass
 class BusController(Module): pass
-class IPInterface(BusController): pass
-class IPPOEInterface(BusController):
-    def SwitchBusOn(Port,On): pass
-class IPWifiInterface(IPInterface):
+class NetworkInterface(BusController): pass
+class NetworkWifiInterface(NetworkInterface):
     def Scan(self): pass
     def Connect(self,ssid,passphrase=None): pass
     def Disconnect(self): pass
+class NetworkDevice(Module):pass
+class NetworkSwitch(NetworkDevice):pass
+class NetworkPOESwitch(NetworkSwitch):
+    def SwitchBusOn(Port,On): pass
 class ABBusController(BusController): pass
 Devices = Module('/')
 def EnsureDevice(typ,name=None,WaitTime=0):

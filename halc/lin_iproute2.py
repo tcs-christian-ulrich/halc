@@ -1,4 +1,5 @@
 from . import hal
+import threading
 try:
     from pyroute2 import IW
     from pyroute2 import IPRoute
@@ -7,8 +8,8 @@ try:
     #sudo setcap cap_net_admin,cap_net_raw+ep /usr/bin/python3.8
     iw = IW()
 except:pass
-class IPRoute2Interface(hal.IPInterface):pass
-class IPRoute2WifiInterface(hal.IPWifiInterface):pass
+class IPRoute2Interface(hal.NetworkInterface):pass
+class IPRoute2WifiInterface(hal.NetworkWifiInterface):pass
 class Enumerate(threading.Thread): 
     def run(self):
         try:

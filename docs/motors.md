@@ -3,9 +3,9 @@ halc provides Classes to use Motors directly (a.t. only Steppers), and Virtual A
 ::: halc.hal.Motor
     rendering:
       show_root_heading: true
-::: halc.hal.MotorController
+::: halc.hal.Axis
     rendering:
       show_root_heading: true
-::: halc.hal.Axis
+::: halc.hal.MotorController
     rendering:
       show_root_heading: true
