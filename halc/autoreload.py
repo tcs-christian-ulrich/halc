@@ -46,15 +46,15 @@ def file_times(path):
 def print_stdout(process):
     stdout = process.stdout
     if stdout != None:
-        print stdout
+        print(stdout)
 
 if len(sys.argv) <= 1:
-    print "Autoreload - Restarts a process upon file changes."
-    print "Usage:"
-    print "  %s [-f filter] command" % sys.argv[0]
-    print
-    print "  -f filter    optional file extension (e.g. *.py)"
-    print "               can be repeated multiple times"
+    print("Autoreload - Restarts a process upon file changes.")
+    print("Usage:")
+    print("  %s [-f filter] command" % sys.argv[0])
+    print()
+    print("  -f filter    optional file extension (e.g. *.py)")
+    print("               can be repeated multiple times")
     sys.exit(0)
 
 command_index = 1
@@ -86,9 +86,9 @@ while True:
     if max_mtime > last_mtime:
         last_mtime = max_mtime
         if process.poll():
-            print 'Restarting process.'
+            print("Restarting process.")
             process.kill()
         else:
-            print 'No process to kill.'
+            print("No process to kill.")
         process = subprocess.Popen(command, shell=True)
     time.sleep(wait)
