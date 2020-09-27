@@ -57,8 +57,12 @@ class Interface(Sensor):
     def __str__(self):
         return Module.__str__(self)
     def read(self,timeout=100):
+        """ Reads an protocol from the Interface Protocol Que 
+        """
         return None
     def write(self,prot):
+        """ Sends an protocol 
+        """
         return False
 class Video(Sensor):
     """ Video Capturing Base Class
@@ -72,9 +76,17 @@ class Video(Sensor):
     def read(self):
         return None
     def Capture(self):
+        """ Captures an single Frame
+        """
         return read(self)
-    def CaptureSequence(self,HandlerFunction): pass
-    def Stop(self): pass
+    def CaptureSequence(self,HandlerFunction):
+        """Captures an sequence of images, the HandlerFunction is called for every ready frame
+        """
+        return False
+    def Stop(self): 
+        """ Stopps capturing the sequence
+        """
+        return False
 class Camera(Video):pass
 class Grabber(Video):pass
 class Scanner(Video):pass
@@ -90,17 +102,30 @@ class DAC(Actor):
         return False
 class AudioADC(ADC):
     def SetInputVolume(self,Volume,channel = None):
+        """ Adjusts the input volume of the sound device
+        """
         return False
     def SampleToWav(self,Filename,Time,SampleFormat='cd',Blocking=False):
+        """Samples Time Seconds to an Wav file
+        """
         return False
     def StopSampling(self):
+        """immedialy stops the sampling
+        """ 
         return False
 class AudioDAC(DAC):
     def SetOutputVolume(self,Volume,channel = None):
+        """ Adjusts the output volume of the sound device
+        """
         return False
     def OutputFromWav(self,Filename):
+        """ plays an wav file
+        """
         return False
-class AnalogAudioIO(AudioDAC,AudioADC): pass
+class Soundcard(AudioDAC,AudioADC):
+    """An Audio Interface wich combines AudioDAC and AudioADC
+    """
+    pass
 class VoltageSensor(ADC):
     def __init__(self, id,measurements=1, parent=None):
         self.measurements=measurements
