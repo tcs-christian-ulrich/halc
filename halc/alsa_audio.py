@@ -2,7 +2,7 @@ import threading,subprocess,time
 from . import hal
 try: import alsaaudio 
 except: print("pyalsaaudio not installed !")
-class  ALSAAudio(hal.AnalogAudioIO):
+class  ALSAAudio(hal.Soundcard):
     def __init__(self, id, hw ,parent=None):
         hal.AudioADC.__init__(self,id,parent)
         self.hw = hw
