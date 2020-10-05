@@ -14,7 +14,7 @@ except:
 ipcon = None
 def findDeviceType(id,devicetype):
     global ipcon
-    tmp = sensors.Devices.find(id)
+    tmp = hal.Devices.find(id)
     if tmp!=None:
         return tmp.Device
     else:
@@ -35,26 +35,26 @@ def findDeviceType(id,devicetype):
 class tfMasterBrick(hal.Module):
     def __init__(self, id, devicetype, parent=None):
         tmp = findDeviceType(id,devicetype)
-        sensors.Module.__init__(self,id,parent)
+        hal.Module.__init__(self,id,parent)
         self.Device = tmp
     def Reset(self):
         self.Device.reset()
 class tfServoBrick(hal.Module):
     def __init__(self, id, devicetype, parent=None):
         tmp = findDeviceType(id,devicetype)
-        sensors.Module.__init__(self,id,parent)
+        hal.Module.__init__(self,id,parent)
         self.Device = tmp
 class tfServoActor(hal.ServoActor):
     def __init__(self, id, devicetype, parent=None):
         tmp = findDeviceType(id,devicetype)
-        tmp1 = sensors.Devices.find(id)
-        sensors.ServoActor.__init__(self,id,tmp1)
+        tmp1 = hal.Devices.find(id)
+        hal.ServoActor.__init__(self,id,tmp1)
         self.Device = tmp
         for i in range(7):
             self.Names[i]=i
             self.ServoBasePosition[i]=0
     def Power(self,servo,BasePosition=None,Velocity=65535,Period=14248,on=True):
-        sensors.ServoActor.Power(self,servo,BasePosition,Velocity,Period,on)
+        hal.ServoActor.Power(self,servo,BasePosition,Velocity,Period,on)
         try:
             self.Device.set_velocity(servo,Velocity)
             self.Device.set_period(servo,Period)
@@ -93,7 +93,7 @@ class tfServoActor(hal.ServoActor):
 class tfServoCurrentSensor(hal.CurrentSensor):
     def __init__(self, id, devicetype,measurements=8, parent=None):
         tmp = findDeviceType(id,devicetype)
-        sensors.CurrentSensor.__init__(self,id,measurements=measurements,parent=parent)
+        hal.CurrentSensor.__init__(self,id,measurements=measurements,parent=parent)
         self.Device = tmp
     def Current(self):
         max_curr = 0
@@ -107,7 +107,7 @@ class tfServoCurrentSensor(hal.CurrentSensor):
 class tfVoltageSensor(hal.VoltageSensor):
     def __init__(self, id, devicetype, parent=None):
         tmp = findDeviceType(id,devicetype)
-        sensors.Sensor.__init__(self,id,parent)
+        hal.Sensor.__init__(self,id,parent)
         self.Calibration = 0.0
         self.Device = tmp
     def Voltage(self):
@@ -116,7 +116,7 @@ class tfCurrentSensor(hal.CurrentSensor):
     def __init__(self, id, devicetype, parent=None,measurements=25):
         tmp = findDeviceType(id,devicetype)
         self.measurements=1
-        sensors.CurrentSensor.__init__(self,id,parent,measurements)
+        hal.CurrentSensor.__init__(self,id,parent,measurements)
         self.Device = tmp
         self.Device = tmp
         #                      4,1.1ms  ,332us
@@ -139,7 +139,7 @@ class tfCurrentSensor(hal.CurrentSensor):
 class tfColorSensor(hal.ColorSensor):
     def __init__(self, id, devicetype, parent=None):
         tmp = findDeviceType(id,devicetype)
-        sensors.Sensor.__init__(self,id,parent)
+        hal.Sensor.__init__(self,id,parent)
         self.Device = tmp
     def Color(self):
         return self.Device.get_color()
@@ -147,31 +147,31 @@ def cb_enumerate(uid, connected_uid, position, hardware_version, firmware_versio
    #print("cb_enumerate():",uid, connected_uid, position, hardware_version, firmware_version ,device_identifier)
    if enumeration_type == IPConnection.ENUMERATION_TYPE_DISCONNECTED:
       #print("cb_enumerate().Disconnected: " + str(enumeration_type) + " UID: " + uid+" DID: "+str(device_identifier))
-      aSensor = sensors.Devices.find(uid)
+      aSensor = hal.Devices.find(uid)
       if aSensor:
         del(aSensor)
       return
    if enumeration_type == IPConnection.ENUMERATION_TYPE_CONNECTED or \
            enumeration_type == IPConnection.ENUMERATION_TYPE_AVAILABLE:
       #print("cb_enumerate().Connected Type: " + str(enumeration_type) + " UID: " + uid+" DID: "+str(device_identifier))
-      aParent = sensors.Devices.find(connected_uid)
+      aParent = hal.Devices.find(connected_uid)
       if aParent:
         if device_identifier == 227 or device_identifier == 2105: # voltage current brick
-            if sensors.Devices.find(uid,sensors.VoltageSensor) == None:
+            if hal.Devices.find(uid,hal.VoltageSensor) == None:
                 tfVoltageSensor(uid,device_identifier,aParent)
                 tfCurrentSensor(uid,device_identifier,aParent)
         if device_identifier == 100: #io16 Bricklet
-            if sensors.Devices.find(uid,sensors.IOPort) == None:
+            if hal.Devices.find(uid,hal.IOPort) == None:
                 tfIOPort(uid,device_identifier,aParent)
         if device_identifier == 243: #Color Bricklet
-            if sensors.Devices.find(uid,sensors.ColorSensor) == None:
+            if hal.Devices.find(uid,hal.ColorSensor) == None:
                 tfColorSensor(uid,device_identifier,aParent)
       else:
         if device_identifier == 13: #Master
-            if sensors.Devices.find(uid,tfMasterBrick) == None:
+            if hal.Devices.find(uid,tfMasterBrick) == None:
                 tfMasterBrick(uid,device_identifier)
         if device_identifier == 14: #Servo
-            if sensors.Devices.find(uid,tfServoBrick) == None:
+            if hal.Devices.find(uid,tfServoBrick) == None:
                 sb = tfServoBrick(uid,device_identifier)
                 tfServoActor(uid,device_identifier,sb)
                 sc = tfServoCurrentSensor(uid,device_identifier,parent=sb)
