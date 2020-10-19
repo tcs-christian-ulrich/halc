@@ -265,7 +265,6 @@ class Axis(Actor):
         self.Motor = Motor
         self.MotorController = MotorController
         self.Transmission = Transmission
-        self.Position = 0
         self.newPosition = 0
     def Move(self,Value=None,Speed=None,Time=None,Acceleration=None):
         """ with this function the User can set an Target position ti any time (even during movement)
@@ -282,11 +281,13 @@ class Axis(Actor):
     def Step(self,Steps,Direction):
         """ This function has to be called continously, normal that will be done threaded by MotorController bit it can be done also manually
         """
-        self.Motor.Steps(Steps*Transmission,Direction)
-        if Direction == self.Motor.CLOCKWISE:
-            self.Position += Steps*Transmission
-        else:
-            self.Position -= Steps*Transmission
+        self.Motor.Steps(Steps*self.Transmission,Direction)
+    @property
+    def Position(self):
+        return self.Motor.Position*self.Transmission
+    @Position.setter
+    def Position(self, value):
+        self.newPosition = value
 class LinearAxis(Axis):
     def __init__(self,id,Motor,MotorController,Transmission=1,parent=None,Min=0,Max=None):
         Axis.__init__(self,id,Motor,MotorController,Transmission,parent)
