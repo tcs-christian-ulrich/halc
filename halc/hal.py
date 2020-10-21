@@ -131,10 +131,10 @@ class VoltageSensor(ADC):
         self.measurements=measurements
         ADC.__init__(self,id,parent)
         self.Calibration = 0.0
-    def Voltage(self):
+    def Voltage(self,Port=1):
         return -1
-    def Sample(self):
-        return self.Voltage()
+    def Sample(self,Port=1):
+        return self.Voltage(Port)
     def __str__(self):
         ret = Sensor.__str__(self)+' Voltage:'+str(self.Voltage())+' V'
         return  ret
@@ -143,7 +143,7 @@ class CurrentSensor(Sensor):
         Sensor.__init__(self,id,parent)
         self.measurements=measurements
         self.Calibration = 0.0
-    def Current(self):
+    def Current(self,Port=1):
         return -1
     def __str__(self):
         ret = Sensor.__str__(self)+' Current:'+str(self.Current())+' mA'
