@@ -448,7 +448,7 @@ class NetworkDevice(Module):
     """
 class NetworkSwitch(NetworkDevice):pass
 class NetworkPOESwitch(NetworkSwitch):
-    def SwitchPower(Port,On): 
+    def SwitchPower(self,Port,On): 
         """ Switches POE on specified Port on/off
         """
 class ABBusController(BusController): pass
