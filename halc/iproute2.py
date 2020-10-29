@@ -12,6 +12,7 @@ class IPRoute2Interface(hal.NetworkInterface):pass
 class IPRoute2WifiInterface(hal.NetworkWifiInterface):pass
 class Enumerate(threading.Thread): 
     def run(self):
+        global ip,iw
         try:
             while threading.main_thread().isAlive():
                 for dev in hal.Devices.Modules:
