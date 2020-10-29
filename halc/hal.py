@@ -427,10 +427,13 @@ class Compass(Sensor):
         pass
     def Disable():
         pass
-class BusController(Module): pass
+class BusController(Module):
+    def up(self): pass
+    def down(self): pass
 class NetworkInterface(BusController):
     """ Basic Network Interface class
     """
+    def addAddress(self,address,pefixlen): pass
 class NetworkWifiInterface(NetworkInterface):
     """ Basic Network Wifi Interface Class
     """
