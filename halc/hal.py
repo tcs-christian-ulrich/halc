@@ -149,7 +149,7 @@ class CurrentSensor(Sensor):
         ret = Sensor.__str__(self)+' Current:'+str(self.Current())+' mA'
         return  ret
 class ColorSensor(Sensor):
-    def Color(self):
+    def Color(self,Port=1):
         return 0,0,0,-1 #RGBA
     def __str__(self):
         r,g,b,a = self.Color()

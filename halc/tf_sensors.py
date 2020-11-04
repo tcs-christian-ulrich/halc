@@ -110,7 +110,7 @@ class tfVoltageSensor(hal.VoltageSensor):
         hal.Sensor.__init__(self,id,parent)
         self.Calibration = 0.0
         self.Device = tmp
-    def Voltage(self):
+    def Voltage(self,Port=1):
         return float((self.Device.get_voltage()/1000)-self.Calibration)
 class tfCurrentSensor(hal.CurrentSensor):
     def __init__(self, id, devicetype, parent=None,measurements=25):
@@ -121,7 +121,7 @@ class tfCurrentSensor(hal.CurrentSensor):
         self.Device = tmp
         #                      4,1.1ms  ,332us
         self.Device.set_configuration(BrickletVoltageCurrent.AVERAGING_4,4      ,3    )
-    def Current(self):
+    def Current(self,Port=1):
         if not self.measurements:
             self.measurements = 1
         try:
@@ -141,7 +141,7 @@ class tfColorSensor(hal.ColorSensor):
         tmp = findDeviceType(id,devicetype)
         hal.Sensor.__init__(self,id,parent)
         self.Device = tmp
-    def Color(self):
+    def Color(self,Port=1):
         return self.Device.get_color()
 def cb_enumerate(uid, connected_uid, position, hardware_version, firmware_version,device_identifier, enumeration_type):# Register incoming enumeration
    #print("cb_enumerate():",uid, connected_uid, position, hardware_version, firmware_version ,device_identifier)
