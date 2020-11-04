@@ -9,7 +9,8 @@ class MPCamera(hal.Grabber):
         self.Port = port
         self.Name = Name
     def capture(self,dev,CloseCapture = False):
-        os.system("mplayer tv:// -tv driver=v4l2:device=/dev/video"+str(self.Port)+":input=1:fps=25 -hardframedrop -vf pp=lb -frames 1 -vo png")
+        os.system("ffmpeg -f video4linux2 -video_size 720x576 -i /dev/video0 -vframes 1 00000001.png -y")        
+        #os.system("mplayer tv:// -tv driver=v4l2:device=/dev/video"+str(self.Port)+":input=1:fps=25 -hardframedrop -vf pp=lb -frames 1 -vo png")
         img = cv2.imread("/home/pi/00000001.png")
         if self.logger.getEffectiveLevel() < logging.DEBUG:
             os.remove("/home/pi/00000001.png")
