@@ -312,6 +312,12 @@ class RotationAxis(Axis):
             LinearAxis.Move(self,None,Speed,Time,Acceleration)
     def Rotate(self,Value,Speed=None,Time=None,Acceleration=None):
         Move(self,Value,Speed,Time,Acceleration)
+    @property
+    def Position(self):
+        return Axis.Position-(self.Max-self.Min)
+    @Position.setter
+    def Position(self, value):
+        self.newPosition = value+(self.Max-self.Min)
 class Motor(Actor):
     """ Base class to drive an Motor
     """
