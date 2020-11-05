@@ -59,12 +59,12 @@ class MotorAxisTests(unittest.TestCase):
         for i in range(5):
             self.mc.step()
         self.assertEqual(self.motor.Position,-9)
-    def test_RotaryMovement(self):
+    def test_RotaryMovementP(self):
         self.ra.Move()
         for i in range(5):
             self.mc.step()
         self.assertEqual(self.motor.Position,9)
-    def test_RotaryMovement(self):
+    def test_RotaryMovementN(self):
         self.ra.Move(Speed=-self.motor.maxRPM)
         for i in range(5):
             self.mc.step()
