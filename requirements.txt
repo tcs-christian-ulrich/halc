@@ -6,6 +6,6 @@ mkdocs
 git+https://github.com/pugong/mkdocs-mermaid-plugin
 mkdocstrings
 mkdocs-material
-PyBluez
+rpyc
 #wpa_supplicant
 #PyAccessPoint

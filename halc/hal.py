@@ -36,6 +36,7 @@ class Module:
         else:
             ret = str(self._id)
         return  ret
+class Proxy(Module): pass
 class Sensor(Module):
     """ Base class for all Sensors
     """
