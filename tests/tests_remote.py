@@ -25,5 +25,16 @@ class RemoteTests(unittest.TestCase):
         conn = remote.RPyCModules('localhost')
         conn.Connect()
         conn.Disconnect()
+    def testHalFind(self):
+        conn = remote.RPyCModules('localhost')
+        conn.Connect()
+        try:
+            hal = conn.LoadModule('halc.hal')
+            conn.LoadModule('halc.iproute2')
+            hal.showTree()
+            loInterface = hal.Devices.find('lo')
+            self.assertIsNotNone(loInterface,'lo Interface expected')
+        finally:
+            conn.Disconnect()
 if __name__ == '__main__':
     unittest.main()        

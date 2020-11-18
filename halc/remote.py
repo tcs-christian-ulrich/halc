@@ -9,3 +9,5 @@ class RPyCModules(hal.Proxy):
             self.conn = rpyc.classic.connect(Host, port=Port)
     def Disconnect(self):
         self.conn.close()
+    def LoadModule(self,Name):
+        return self.conn.modules[Name]

@@ -44,15 +44,14 @@ class Enumerate(threading.Thread):
                         dev.Found = False
                 for link in ip.get_links():
                     adev = None
-                    if link.get_attr('IFLA_IFNAME')!='lo':
-                        adev = hal.Devices.find(link.get_attr('IFLA_IFNAME'),hal.NetworkInterface)
-                        if adev is None:
-                            try:
-                                index = ip.link_lookup(ifname=link.get_attr('IFLA_IFNAME'))[0]
-                                iw.get_interface_by_ifindex(index)
-                                adev = IPRoute2WifiInterface(link.get_attr('IFLA_IFNAME'))
-                            except:
-                                adev = IPRoute2Interface(link.get_attr('IFLA_IFNAME'))
+                    adev = hal.Devices.find(link.get_attr('IFLA_IFNAME'),hal.NetworkInterface)
+                    if adev is None:
+                        try:
+                            index = ip.link_lookup(ifname=link.get_attr('IFLA_IFNAME'))[0]
+                            iw.get_interface_by_ifindex(index)
+                            adev = IPRoute2WifiInterface(link.get_attr('IFLA_IFNAME'))
+                        except:
+                            adev = IPRoute2Interface(link.get_attr('IFLA_IFNAME'))
                 for dev in hal.Devices.Modules:
                     if isinstance(dev,IPRoute2Interface)\
                     or isinstance(dev,NetworkWifiInterface):
