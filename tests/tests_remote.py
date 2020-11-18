@@ -15,8 +15,8 @@ class RemoteTests(unittest.TestCase):
         self.server.close()
     def testConnection(self):
         conn = rpyc.classic.connect("localhost", port=18878)
-        print(conn.modules.sys)
-        print(conn.modules["xml.dom.minidom"].parseString("<a/>"))
+        #print(conn.modules.sys)
+        #print(conn.modules["xml.dom.minidom"].parseString("<a/>"))
         conn.execute("x = 5")
         self.assertEqual(conn.namespace["x"], 5)
         self.assertEqual(conn.eval("1+x"), 6)
@@ -31,6 +31,7 @@ class RemoteTests(unittest.TestCase):
         try:
             hal = conn.LoadModule('halc.hal')
             conn.LoadModule('halc.iproute2')
+            print("")
             hal.showTree()
             loInterface = hal.Devices.find('lo')
             self.assertIsNotNone(loInterface,'lo Interface expected')
