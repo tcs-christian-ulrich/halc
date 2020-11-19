@@ -425,6 +425,11 @@ class GPIOActor(Actor):
         pass
     def input(self,port):
         return None
+class Relais(GPIOActor):
+    def output(self,port,val):
+        pass
+    def switch(self,port,val):
+        return self.output(port,val)
 class Compass(Sensor): 
     def getMagnet():
         pass
