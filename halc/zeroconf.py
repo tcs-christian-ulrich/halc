@@ -8,6 +8,8 @@ class Enumerate:
     def add_service(self, zeroconf, type, name):
         info = zeroconf.get_service_info(type, name)
         print("Service %s added, service info: %s" % (name, info))
+#try:        
 zeroconf = Zeroconf()
 enumerate = Enumerate()
-browser = ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
+browser = ServiceBrowser(zeroconf, "_http._tcp.local.", enumerate)
+#except:pass
