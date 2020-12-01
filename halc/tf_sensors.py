@@ -10,6 +10,7 @@ try:
     from tinkerforge.bricklet_color import BrickletColor
     from tinkerforge.bricklet_dual_relay import BrickletDualRelay
     from tinkerforge.bricklet_industrial_dual_relay import BrickletIndustrialDualRelay
+    from tinkerforge.bricklet_industrial_quad_relay_v2 import BrickletIndustrialQuadRelayV2
 except:
     print("No tinkerforge Libs installed")
     exit
@@ -20,22 +21,16 @@ def findDeviceType(id,devicetype):
     if tmp!=None:
         return tmp.Device
     else:
-        if devicetype == 13:
-            return BrickMaster(id, ipcon)
-        elif devicetype == 14:
-            return BrickServo(id, ipcon)
-        elif devicetype == 227:
-            return BrickletVoltageCurrent(id, ipcon)
-        elif devicetype == 2105:
-            return BrickletVoltageCurrentV2(uid, ipcon)
-        elif devicetype == 100:
-            return BrickletIO16(id, ipcon)
-        elif devicetype == 243:
-            return BrickletColor(id, ipcon)
-        elif devicetype == 26:
-            return BrickletDualRelay(id, ipcon)
-        elif devicetype == 284:
-            return BrickletIndustrialDualRelay(id, ipcon)
+        if devicetype == 13: return BrickMaster(id, ipcon)
+        elif devicetype == 14: return BrickServo(id, ipcon)
+        elif devicetype == 227: return BrickletVoltageCurrent(id, ipcon)
+        elif devicetype == 2105: return BrickletVoltageCurrentV2(uid, ipcon)
+        elif devicetype == 100: return BrickletIO16(id, ipcon)
+        elif devicetype == 243: return BrickletColor(id, ipcon)
+        elif devicetype == 26: return BrickletDualRelay(id, ipcon)
+        elif devicetype == 284: return BrickletIndustrialDualRelay(id, ipcon)
+        elif devicetype == 225: return BrickletIndustrialQuadRelay(id, ipcon)
+        elif devicetype == 2102: return BrickletIndustrialQuadRelayV2(id, ipcon)
         else:
             print("Warning: DeviceType "+str(devicetype)+" not found")
 class tfMasterBrick(hal.Module):
@@ -149,15 +144,27 @@ class tfColorSensor(hal.ColorSensor):
         self.Device = tmp
     def Color(self,Port=1):
         return self.Device.get_color()
-class tfDualRelaisBricklet(hal.Relais):
+class tfRelaisBricklet(hal.Relais):
     def __init__(self, id, devicetype, parent=None):
         tmp = findDeviceType(id,devicetype)
         hal.Actor.__init__(self,id,parent)
         self.Device = tmp
-        self.Values = self.Device.get_value()
+        if self.Device.device_identifier == 26:
+            self.Values = list(self.Device.get_state())
+        else:
+            self.Values = list(self.Device.get_value())
     def output(self,port,val):
         self.Values[self.getPin(port)] = val
-        self.Device.set_value(self.Values)
+        if self.Device.device_identifier == 26:
+            self.Device.set_state(self.Values[0],self.Values[1])
+        else:
+            self.Device.set_value(self.Values)
+    def __str__(self):
+        try:
+            ret = hal.Sensor.__str__(self)+' Status:'+str(self.Values)
+            return  ret
+        except:
+            return hal.Sensor.__str__(self)
 def cb_enumerate(uid, connected_uid, position, hardware_version, firmware_version,device_identifier, enumeration_type):# Register incoming enumeration
    #print("cb_enumerate():",uid, connected_uid, position, hardware_version, firmware_version ,device_identifier)
    if enumeration_type == IPConnection.ENUMERATION_TYPE_DISCONNECTED:
@@ -181,6 +188,11 @@ def cb_enumerate(uid, connected_uid, position, hardware_version, firmware_versio
         if device_identifier == 243: #Color Bricklet
             if hal.Devices.find(uid,hal.ColorSensor) == None:
                 tfColorSensor(uid,device_identifier,aParent)
+        if device_identifier == 26\
+        or device_identifier == 284\
+        or device_identifier == 2102:
+            if hal.Devices.find(uid,tfRelaisBricklet) == None:
+                tfRelaisBricklet(uid,device_identifier,aParent)
       else:
         if device_identifier == 13: #Master
             if hal.Devices.find(uid,tfMasterBrick) == None:
@@ -191,12 +203,6 @@ def cb_enumerate(uid, connected_uid, position, hardware_version, firmware_versio
                 tfServoActor(uid,device_identifier,sb)
                 sc = tfServoCurrentSensor(uid,device_identifier,parent=sb)
                 sc.Name = 'servo'
-        if device_identifier == 26: #Dual Relais
-            if hal.Devices.find(uid,tfDualRelaisBricklet) == None:
-                tfDualRelaisBricklet(uid,device_identifier,aParent)
-        if device_identifier == 284: #Industrial Dual Relais
-            if hal.Devices.find(uid,tfDualRelaisBricklet) == None:
-                tfDualRelaisBricklet(uid,device_identifier,aParent)
         #11 	DC Brick
         #13 	Master Brick
         #14 	Servo Brick
