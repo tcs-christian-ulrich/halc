@@ -16,6 +16,12 @@ class RPyCModules(hal.Proxy):
         if self.hal is not None:
             return self.hal.Devices.find(id,typ,Name)
         return None
+    @property
+    def Modules(self):
+        if self.hal is not None:
+            return self.hal.Devices.Modules
+        else:
+            return []
     def Connect(self,Host=None,Port=18812):
         if Host is None:
             self.conn = rpyc.classic.connect(self._id, port=Port)
@@ -56,7 +62,8 @@ class Enumerate(threading.Thread):
                             try:
                                 dev = RPyCModules(ip)
                                 #print(ip,port)
-                            except: 
+                            except BaseException as e: 
+                                print(str(e))
                                 del(dev)
                         else:
                             adev.Found = True
@@ -65,8 +72,9 @@ class Enumerate(threading.Thread):
                             if dev.Found == False:
                                 del(dev)
                     time.sleep(1)
-                except: 
-                    pass
-        except: pass
+                except BaseException as e: 
+                    print(str(e))
+        except BaseException as e:
+            print(str(e))
 enumerate = Enumerate() 
 enumerate.start()

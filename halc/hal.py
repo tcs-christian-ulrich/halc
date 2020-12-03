@@ -21,7 +21,8 @@ class Module:
         return None
     def __init__(self, id, parent=None):
         self._id = id
-        self.Modules = []
+        try: self.Modules = []
+        except: pass
         self.Device = None
         self.Name =None
         self.Found = True
