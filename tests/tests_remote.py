@@ -23,11 +23,9 @@ class RemoteTests(unittest.TestCase):
         conn.close()
     def testHalConnect(self):
         conn = remote.RPyCModules('localhost')
-        conn.Connect()
         conn.Disconnect()
     def testHalFind(self):
         conn = remote.RPyCModules('localhost')
-        conn.Connect()
         try:
             hal = conn.LoadModule('halc.hal')
             conn.LoadModule('halc.iproute2')
