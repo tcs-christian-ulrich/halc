@@ -20,7 +20,7 @@ class  ALSAAudio(hal.Soundcard):
             mixer.setvolume(Volume,channel,alsaaudio.PCM_CAPTURE)
         return True
     def SampleToWav(self,Filename,Time,SampleFormat='cd',Blocking=False):
-        recparams = ['/usr/bin/arecord','-D','plug'+self.hw,'-f',SampleFormat,'-d','1','-r','44100','/tmp/actsweep.wav']
+        recparams = ['/usr/bin/arecord','-D','plug'+self.hw,'-f',SampleFormat,'-d','1','-r','44100',Filename]
         r=subprocess.Popen(recparams, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self._sampleproc = r
         if Blocking==True:
