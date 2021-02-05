@@ -24,7 +24,7 @@ def findDeviceType(id,devicetype):
         if devicetype == 13: return BrickMaster(id, ipcon)
         elif devicetype == 14: return BrickServo(id, ipcon)
         elif devicetype == 227: return BrickletVoltageCurrent(id, ipcon)
-        elif devicetype == 2105: return BrickletVoltageCurrentV2(uid, ipcon)
+        elif devicetype == 2105: return BrickletVoltageCurrentV2(id, ipcon)
         elif devicetype == 100: return BrickletIO16(id, ipcon)
         elif devicetype == 243: return BrickletColor(id, ipcon)
         elif devicetype == 26: return BrickletDualRelay(id, ipcon)
