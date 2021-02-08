@@ -157,7 +157,7 @@ class ColorSensor(Sensor):
         r,g,b,a = self.Color()
         ret = str(self._id)+' Color:'+str(r)+','+str(g)+','+str(b)+','+str(a)+','+' RGBA'
         return  ret
-class MotorController(threading.Thread):
+class MotorController(threading.Thread,Actor):
     """ The MotorController drives Motors and Axes threaded 
 
     ```mermaid

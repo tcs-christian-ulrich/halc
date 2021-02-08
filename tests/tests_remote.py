@@ -6,7 +6,7 @@ from rpyc.utils.server import ThreadedServer, ThreadPoolServer
 from rpyc import SlaveService
 class RemoteTests(unittest.TestCase):
     def setUp(self):
-        self.server = ThreadedServer(SlaveService, port=18878, auto_register=False)
+        self.server = ThreadedServer(SlaveService, port=18812, auto_register=False)
         self.server.logger.quiet = False
         self.server._start_in_thread()
     def tearDown(self):
@@ -14,7 +14,7 @@ class RemoteTests(unittest.TestCase):
             pass
         self.server.close()
     def testConnection(self):
-        conn = rpyc.classic.connect("localhost", port=18878)
+        conn = rpyc.classic.connect("localhost", port=18812)
         #print(conn.modules.sys)
         #print(conn.modules["xml.dom.minidom"].parseString("<a/>"))
         conn.execute("x = 5")
@@ -31,7 +31,7 @@ class RemoteTests(unittest.TestCase):
             conn.LoadModule('halc.iproute2')
             print("")
             hal.showTree()
-            loInterface = hal.Devices.find('lo')
+            loInterface = hal.Devices.find('localhost')
             self.assertIsNotNone(loInterface,'lo Interface expected')
         finally:
             conn.Disconnect()
