@@ -155,10 +155,14 @@ class tfRelaisBricklet(hal.Relais):
             self.Values = list(self.Device.get_value())
     def output(self,port,val):
         self.Values[self.getPin(port)] = val
-        if self.Device.device_identifier == 26:
-            self.Device.set_state(self.Values[0],self.Values[1])
-        else:
-            self.Device.set_value(self.Values)
+        try:
+            if self.Device.device_identifier == 26:
+                self.Device.set_state(self.Values[0],self.Values[1])
+            else:
+                self.Device.set_value(self.Values)
+            return True
+        except:
+            return False
     def __str__(self):
         try:
             ret = hal.Sensor.__str__(self)+' Status:'+str(self.Values)
