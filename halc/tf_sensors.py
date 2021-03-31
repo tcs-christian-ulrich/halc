@@ -8,6 +8,7 @@ try:
     from tinkerforge.brick_servo import BrickServo
     from tinkerforge.bricklet_io16 import BrickletIO16
     from tinkerforge.bricklet_color import BrickletColor
+    from tinkerforge.bricklet_color_v2 import BrickletColorV2
     from tinkerforge.bricklet_dual_relay import BrickletDualRelay
     from tinkerforge.bricklet_industrial_dual_relay import BrickletIndustrialDualRelay
     from tinkerforge.bricklet_industrial_quad_relay_v2 import BrickletIndustrialQuadRelayV2
@@ -27,6 +28,7 @@ def findDeviceType(id,devicetype):
         elif devicetype == 2105: return BrickletVoltageCurrentV2(id, ipcon)
         elif devicetype == 100: return BrickletIO16(id, ipcon)
         elif devicetype == 243: return BrickletColor(id, ipcon)
+        elif devicetype == 2128: return BrickletColorV2(id, ipcon)
         elif devicetype == 26: return BrickletDualRelay(id, ipcon)
         elif devicetype == 284: return BrickletIndustrialDualRelay(id, ipcon)
         elif devicetype == 225: return BrickletIndustrialQuadRelay(id, ipcon)
@@ -189,7 +191,7 @@ def cb_enumerate(uid, connected_uid, position, hardware_version, firmware_versio
         if device_identifier == 100: #io16 Bricklet
             if hal.Devices.find(uid,hal.IOPort) == None:
                 tfIOPort(uid,device_identifier,aParent)
-        if device_identifier == 243: #Color Bricklet
+        if device_identifier == 243 or device_identifier == 2128: #Color Bricklet
             if hal.Devices.find(uid,hal.ColorSensor) == None:
                 tfColorSensor(uid,device_identifier,aParent)
         if device_identifier == 26\
