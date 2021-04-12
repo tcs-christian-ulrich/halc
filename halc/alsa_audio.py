@@ -61,7 +61,7 @@ class ALSAEnumerate(threading.Thread):
     def __init__(self): 
         threading.Thread.__init__(self) 
     def run(self):
-        while threading.main_thread().isAlive():
+        while threading.main_thread().is_alive():
             for dev in hal.Devices.Modules:
                 if isinstance(dev,ALSAAudio):
                     dev.Found = False
