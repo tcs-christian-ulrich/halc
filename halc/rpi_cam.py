@@ -18,7 +18,7 @@ class PIEnumerate(threading.Thread):
         threading.Thread.__init__(self) 
     def run(self):
         context = pyudev.Context()
-        while threading.main_thread().isAlive():
+        while threading.main_thread().is_alive():
             for dev in hal.Devices.Modules:
                 if isinstance(dev,PICamera):
                     dev.Found = False
