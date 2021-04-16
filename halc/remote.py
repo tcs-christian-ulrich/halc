@@ -49,7 +49,7 @@ class Enumerate(threading.Thread):
         try:
             from rpyc.utils import registry
             registrar = registry.UDPRegistryClient()
-            while threading.main_thread().isAlive():
+            while threading.main_thread().is_alive():
                 try:
                     for dev in hal.Devices.Modules:
                         if isinstance(dev,RPyCModules):

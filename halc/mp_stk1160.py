@@ -35,7 +35,7 @@ class mpEnumerate(threading.Thread):
         return True
     def run(self):
         context = pyudev.Context()
-        while threading.main_thread().isAlive():
+        while threading.main_thread().is_alive():
             for dev in hal.Devices.Modules:
                 if isinstance(dev,MPCamera):
                     dev.Found = False
