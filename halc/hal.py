@@ -145,7 +145,7 @@ class CurrentSensor(Sensor):
         Sensor.__init__(self,id,parent)
         self.measurements=measurements
         self.Calibration = 0.0
-    def Current(self,Port=1):
+    def Current(self,Port=1,measurements=None):
         return -1
     def __str__(self):
         ret = Sensor.__str__(self)+' Current:'+str(self.Current())+' mA'

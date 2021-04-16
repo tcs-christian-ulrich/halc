@@ -122,9 +122,11 @@ class tfCurrentSensor(hal.CurrentSensor):
         self.Device = tmp
         #                      4,1.1ms  ,332us
         self.Device.set_configuration(BrickletVoltageCurrent.AVERAGING_4,4      ,3    )
-    def Current(self,Port=1):
+    def Current(self,Port=1,measurements=None):
         if not self.measurements:
             self.measurements = 1
+        if measurements!=None:
+            self.measurements=measurements
         try:
             max_curr = 0
             for x in range(self.measurements):
