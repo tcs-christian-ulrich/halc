@@ -19,10 +19,10 @@ class Module:
                     return result
             else:
                 a = m.list(id,typ,Name)
-                if a!=None:
+                if a!=[]:
                     result.append(a)
-                if breakafterfound:
-                    return result
+                    if breakafterfound:
+                        return result
         return result
     def find(self,id=None,typ=None,Name=None):
         """ With the find function you can search for Devices/Modules that are Childs of this Module

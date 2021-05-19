@@ -130,8 +130,6 @@ try:
                                         ret = cap.open(i)
                                         if ret==True:
                                             cam = OpenCVCamera('/dev/video'+str(i),Name=dev.get('ID_MODEL'))
-                                        else:
-                                            break
                             else:
                                 adev.Found = True
                     except:
