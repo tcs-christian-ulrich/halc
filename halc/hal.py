@@ -3,22 +3,38 @@ Devices = []
 class Module:
     """ Base Module Class, all other halc Classes are an Module
     """
+    def list(self,id=None,typ=None,Name=None,breakafterfound=False):
+        """ With the find function you can search for Devices/Modules that are Childs of this Module
+
+        just call it with an hardware id of the Module (mac adress, usb vid/pid ...) or an Name (can be set on your own some modules may support names that are avalible in the hardware (e.g. eeprom))
+        or an device typ/class
+        """
+        result = []
+        for m in self.Modules:
+            if  ((id is None) or (m._id==id) or (id in m._id))\
+            and ((typ is None) or (isinstance(m,typ)))\
+            and ((Name is None) or ((m.Name is not None) and ((m.Name == Name) or (Name in m.Name)))):
+                result.append(m)
+                if breakafterfound:
+                    return result
+            else:
+                a = m.list(id,typ,Name)
+                if a!=None:
+                    result.append(a)
+                if breakafterfound:
+                    return result
+        return result
     def find(self,id=None,typ=None,Name=None):
         """ With the find function you can search for Devices/Modules that are Childs of this Module
 
         just call it with an hardware id of the Module (mac adress, usb vid/pid ...) or an Name (can be set on your own some modules may support names that are avalible in the hardware (e.g. eeprom))
         or an device typ/class
         """
-        for m in self.Modules:
-            if  ((id is None) or (m._id==id) or (id in m._id))\
-            and ((typ is None) or (isinstance(m,typ)))\
-            and ((Name is None) or ((m.Name is not None) and ((m.Name == Name) or (Name in m.Name)))):
-                return m
-            else:
-                a = m.find(id,typ,Name)
-                if a!=None:
-                    return a
-        return None
+        result = self.list(id,typ,Name,True)
+        if len(result)>0:
+            return result[0]
+        else:
+            return None
     def __init__(self, id, parent=None):
         self._id = id
         try: self.Modules = []
