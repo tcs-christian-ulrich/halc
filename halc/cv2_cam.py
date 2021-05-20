@@ -38,7 +38,7 @@ try:
                 kwargs.setdefault('object_hook', json_numpy_obj_hook)    
                 return json.loads(*args, **kwargs)
             return loads(self.Params)
-        def capture(self,dev,CloseCapture = False):
+        def capture(self,CloseCapture = False):
             if self.cap == None:
                 self.init_capture()
             for i in range(5): #read 5 images from linux v2l fifo to get an actual image
