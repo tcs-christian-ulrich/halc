@@ -103,6 +103,7 @@ try:
                 self.cap = None
         def read(self,CloseCapture = False):
             return self.capture(self.Device,CloseCapture = CloseCapture)
+    FailedCams = []
     class opencvEnumerate(threading.Thread): 
         def __init__(self): 
             threading.Thread.__init__(self) 
@@ -121,7 +122,7 @@ try:
                 for i in range(0,25):
                     try:
                         dev = pyudev.Devices.from_device_file(context, '/dev/video'+str(i))
-                        if dev is not None:
+                        if (dev is not None) and (not '/dev/video'+str(i) in FailedCams):
                             adev = hal.Devices.find('/dev/video'+str(i),hal.Video)
                             if adev == None:
                                 if dev.get('ID_USB_DRIVER') == 'uvcvideo' and dev.get('ID_MODEL').lower()!='stk1160':
@@ -130,6 +131,8 @@ try:
                                         ret = cap.open(i)
                                         if ret==True:
                                             cam = OpenCVCamera('/dev/video'+str(i),Name=dev.get('ID_MODEL'))
+                                        else:
+                                            FailedCams.append('/dev/video'+str(i))
                             else:
                                 adev.Found = True
                     except:
