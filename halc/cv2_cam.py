@@ -40,9 +40,8 @@ try:
             return loads(self.Params)
         def capture(self,CloseCapture = False):
             if self.cap == None:
-                self.init_capture()
-            for i in range(5): #read 5 images from linux v2l fifo to get an actual image
-                ret, img = self.cap.read()
+                self.init_capture(self._id)
+            ret, img = self.cap.read()
             if ret == False:
                 ret, img = self.cap.read()
                 self.logger.debug("capture failed, trying to recapture")
@@ -83,6 +82,8 @@ try:
                     self.cap = cv2.VideoCapture(cam, cv2.CAP_V4L2)
                 except:
                     self.cap = None
+                for i in range(5): #read 5 images from linux v2l fifo to get an actual image
+                    ret, img = self.cap.read()
                 ret, img = self.cap.read()
             else:
                 if not self.cap.isOpened():
@@ -97,6 +98,7 @@ try:
                 if ret == False:
                     self.logger.debug("Capturing failed, releasing...")
                     self.reset()
+                return ret
         def unload(self):
             if self.cap != None:
                 self.cap.release()
