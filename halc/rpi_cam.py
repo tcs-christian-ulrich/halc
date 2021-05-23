@@ -1,7 +1,7 @@
 from . import hal
 try:
     from picamera import PiCamera
-    import cv2
+    import cv2,threading,io,time
     import numpy as np
     class PICamera(hal.Camera):
         def __init__(self, port=-1, parent=None,Name=None):
@@ -11,9 +11,10 @@ try:
                 hal.Sensor.__init__(self,str(port),parent)
             self.Port = port
             self.Name = Name
-        def read(self,CloseCapture = False):
+            self.cam = None
+        def capture(self,CloseCapture = False):
             if self.cam is None:
-                self.cam = picamera.PiCamera()
+                self.cam = PiCamera()
                 self.cam.start_preview()
                 time.sleep(2)
             stream = io.BytesIO()
@@ -28,7 +29,6 @@ try:
         def __init__(self): 
             threading.Thread.__init__(self) 
         def run(self):
-            context = pyudev.Context()
             while threading.main_thread().is_alive():
                 for dev in hal.Devices.Modules:
                     if isinstance(dev,PICamera):
@@ -49,4 +49,5 @@ try:
                 time.sleep(3)
     enumerate = PIEnumerate() 
     enumerate.start()
-except: print("picamera package needs to be installed !")
+except BaseException as e: 
+    print('picamera package needs to be installed ! ('+str(e)+'"')
