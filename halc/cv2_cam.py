@@ -47,7 +47,7 @@ try:
                 self.logger.debug("capture failed, trying to recapture")
             if ret:
                 self.h,  self.w = img.shape[:2]
-                cv2.resize(img,(1024,768))
+                #cv2.resize(img,(1024,768))
             else:
                 self.logger.debug("capture failed, trying to re-initialize")
                 self.cap.release()
@@ -55,7 +55,7 @@ try:
                 self.init_capture()
                 ret, img = self.cap.read()
                 self.h,  self.w = img.shape[:2]
-                cv2.resize(img,(1024,768))
+                #cv2.resize(img,(1024,768))
             if ret == False:
                 self.logger.debug("capture failed !")
                 return False
