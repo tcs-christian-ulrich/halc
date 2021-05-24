@@ -54,7 +54,8 @@ try:
                 self.cap = None
                 self.init_capture()
                 ret, img = self.cap.read()
-                self.h,  self.w = img.shape[:2]
+                if ret:
+                    self.h,  self.w = img.shape[:2]
                 #cv2.resize(img,(1024,768))
             if ret == False:
                 self.logger.debug("capture failed !")
