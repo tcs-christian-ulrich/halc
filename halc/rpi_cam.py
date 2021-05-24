@@ -13,7 +13,7 @@ try:
             self.cam = None
         def capture(self,CloseCapture = False):
             if self.cam is None:
-                self.cam = PiCamera()
+                self.cam = picamera.PiCamera()
                 self.cam.start_preview()
                 time.sleep(2)
             with picamera.array.PiRGBArray(self.cam) as stream:
