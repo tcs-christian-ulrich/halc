@@ -68,7 +68,6 @@ try:
             #self.cap.set(cv2.CV_CAP_PROP_SATURATION, 0)
             #self.cap.set(cv2.CV_CAP_PROP_HUE, 0)
             #self.cap.set(cv2.CV_CAP_PROP_GAIN, 0)
-            ret, img = self.cap.read()
             if ret == False:
                 self.logger.debug("capture failed !")
                 return False
