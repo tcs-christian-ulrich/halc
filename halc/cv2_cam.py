@@ -89,6 +89,21 @@ class OpenCVCamera(hal.Camera):
                 self.cap.release()
                 self.cap = None
                 self.cap = cv2.VideoCapture(cam, cv2.CAP_V4L2)
+            #W, H = 1920, 1080
+            #self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, W)
+            #self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, H)
+            #self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')) # use motion jpeg endpoint
+            #self.cap.set(cv2.CAP_PROP_FPS, 30)
+            #self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25) # expose manual
+            #self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.75) # auto expose
+            #self.cap.set(cv2.CAP_PROP_EXPOSURE, -7.0) # manual expose value 
+                #zB 0,1 für 1 / 10s
+                #2 ^ -5s = 1 / 32s
+            #self.cap.set(cv2.CV_CAP_PROP_BRIGHTNESS, 0)
+            #self.cap.set(cv2.CV_CAP_PROP_CONTRAST, 0)
+            #self.cap.set(cv2.CV_CAP_PROP_SATURATION, 0)
+            #self.cap.set(cv2.CV_CAP_PROP_HUE, 0)
+            #self.cap.set(cv2.CV_CAP_PROP_GAIN, 0)
             ret, img = self.cap.read()
             if ret == False:
                 self.logger.debug("Capturing failed, releasing...")
