@@ -96,7 +96,7 @@ class Video(Sensor):
     def Capture(self,CloseCapture = False):
         """ Captures an single Frame
         """
-        return read(self,CloseCapture)
+        return self.read(CloseCapture)
     def CaptureSequence(self,HandlerFunction):
         """Captures an sequence of images, the HandlerFunction is called for every ready frame
         """

@@ -118,8 +118,6 @@ try:
         def setFPS(FPS):
             self.cap.set(cv2.CAP_PROP_FPS, FPS)
             return True
-        def read(self,CloseCapture = False):
-            return self.capture(self.Device,CloseCapture = CloseCapture)
     FailedCams = []
     class opencvEnumerate(threading.Thread): 
         def __init__(self): 

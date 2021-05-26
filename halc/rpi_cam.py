@@ -1,12 +1,12 @@
 from . import hal
 try:
-    import cv2,threading,io,time,picamera,picamera.array,queue
+    import cv2,threading,io,time,picamera,picamera.array,queue,logging
     import numpy as np
     class StreamingOutput(object):
         def __init__(self):
             self.frame = None
             self.buffer = io.BytesIO()
-            self.condition = Condition()
+            self.condition = threading.Condition()
         def write(self, buf):
             if buf.startswith(b'\xff\xd8'):
                 # New frame, copy the existing buffer's content and notify all
@@ -26,16 +26,16 @@ try:
             self.Port = port
             self.Name = Name
             self.cam = None
-            self.queue = queue.Queue(maxsize=1)
         def read(self,CloseCapture = False):
             if self.cam is None:
                 self.init_capture()
-            output.condition.wait()
+            with self.output.condition:
+                self.output.condition.wait()
             if CloseCapture:
                 self.unload()
             if self.logger.getEffectiveLevel() == logging.DEBUG:
                 cv2.imwrite('__cap_.png', output.frame)
-            return output.frame
+            return self.output.frame
         def init_capture(self,cam=1):
             self.cam = picamera.PiCamera()
             self.cam.start_preview()
