@@ -91,18 +91,26 @@ class Video(Sensor):
     def __str__(self):
         return Module.__str__(self)
         self.Image = None
-    def read(self):
+    def read(self,CloseCapture = False):
         return None
-    def Capture(self):
+    def Capture(self,CloseCapture = False):
         """ Captures an single Frame
         """
-        return read(self)
+        return read(self,CloseCapture)
     def CaptureSequence(self,HandlerFunction):
         """Captures an sequence of images, the HandlerFunction is called for every ready frame
         """
         return False
     def Stop(self): 
         """ Stopps capturing the sequence
+        """
+        return False
+    def setResolution(width,height):
+        """ Sets the Capture Resolution to the nearest possible value
+        """
+        return False
+    def setFPS(FPS):
+        """ Sets the Framerate to Capture
         """
         return False
 class Camera(Video):pass

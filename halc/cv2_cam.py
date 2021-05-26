@@ -38,7 +38,7 @@ try:
                 kwargs.setdefault('object_hook', json_numpy_obj_hook)    
                 return json.loads(*args, **kwargs)
             return loads(self.Params)
-        def capture(self,CloseCapture = False):
+        def read(self,CloseCapture = False):
             if self.cap == None:
                 self.init_capture(self._id)
             ret, img = self.cap.read()
@@ -53,11 +53,6 @@ try:
                 self.cap.release()
                 self.cap = None
                 self.cap = cv2.VideoCapture(cam, cv2.CAP_V4L2)
-            #W, H = 1920, 1080
-            #self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, W)
-            #self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, H)
-            #self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')) # use motion jpeg endpoint
-            #self.cap.set(cv2.CAP_PROP_FPS, 30)
             #self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25) # expose manual
             #self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.75) # auto expose
             #self.cap.set(cv2.CAP_PROP_EXPOSURE, -7.0) # manual expose value 
@@ -94,6 +89,7 @@ try:
                     self.cap = cv2.VideoCapture(cam, cv2.CAP_V4L2)
                 except:
                     self.cap = None
+                self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')) # use motion jpeg endpoint
                 for i in range(5): #read 5 images from linux v2l fifo to get an actual image
                     ret, img = self.cap.read()
                 ret, img = self.cap.read()
@@ -115,6 +111,13 @@ try:
             if self.cap != None:
                 self.cap.release()
                 self.cap = None
+        def setResolution(width,height):
+            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+            return self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)==width
+        def setFPS(FPS):
+            self.cap.set(cv2.CAP_PROP_FPS, FPS)
+            return True
         def read(self,CloseCapture = False):
             return self.capture(self.Device,CloseCapture = CloseCapture)
     FailedCams = []

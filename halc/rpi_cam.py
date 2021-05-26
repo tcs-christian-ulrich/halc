@@ -1,7 +1,22 @@
 from . import hal
 try:
-    import cv2,threading,io,time,picamera,picamera.array
+    import cv2,threading,io,time,picamera,picamera.array,queue
     import numpy as np
+    class StreamingOutput(object):
+        def __init__(self):
+            self.frame = None
+            self.buffer = io.BytesIO()
+            self.condition = Condition()
+        def write(self, buf):
+            if buf.startswith(b'\xff\xd8'):
+                # New frame, copy the existing buffer's content and notify all
+                # clients it's available
+                self.buffer.truncate()
+                with self.condition:
+                    self.frame = self.buffer.getvalue()
+                    self.condition.notify_all()
+                self.buffer.seek(0)
+            return self.buffer.write(buf)
     class PICamera(hal.Camera):
         def __init__(self, port=-1, parent=None,Name=None):
             if port == -1:
@@ -11,15 +26,40 @@ try:
             self.Port = port
             self.Name = Name
             self.cam = None
-        def capture(self,CloseCapture = False):
+            self.queue = queue.Queue(maxsize=1)
+        def read(self,CloseCapture = False):
             if self.cam is None:
-                self.cam = picamera.PiCamera()
-                self.cam.start_preview()
-                time.sleep(2)
-            with picamera.array.PiRGBArray(self.cam) as stream:
-                self.cam.capture(stream, format='bgr')
-                image = stream.array
-                return image
+                self.init_capture()
+            output.condition.wait()
+            if CloseCapture:
+                self.unload()
+            if self.logger.getEffectiveLevel() == logging.DEBUG:
+                cv2.imwrite('__cap_.png', output.frame)
+            return output.frame
+        def init_capture(self,cam=1):
+            self.cam = picamera.PiCamera()
+            self.cam.start_preview()
+            time.sleep(2)
+            self.output = StreamingOutput()
+            self.init_start(cam)
+        def init_start(self,cam=1):
+            self.cam.start_recording(self.output, splitter_port=cam, format='mjpeg')
+        def unload(self):
+            self.cam.stop_recording()
+            del(self.cam)
+            self.cam = None
+        def setResolution(width,height):
+            if self.cam is None:
+                self.init_capture()
+            self.cam.resolution = (width, height)
+            self.init_start()
+            return True
+        def setFPS(FPS):
+            if self.cam is None:
+                self.init_capture()
+            self.cam.framerate = FPS
+            self.init_start()
+            return True
     class PIEnumerate(threading.Thread): 
         def __init__(self): 
             threading.Thread.__init__(self) 
