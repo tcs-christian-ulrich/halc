@@ -327,8 +327,8 @@ class RotationAxis(Axis):
         self.Offset = -((Max-Min)/2)
         LinearAxis.__init__(self,id,Motor,MotorController,Transmission,parent,self.Offset+Min,self.Offset+Max)
         self.Overflow = True
-    def Move(self,Value=None,Speed=None,Time=None,Acceleration=None):
-        if Value is not None:
+    def Move(self,Value=0,Speed=None,Time=None,Acceleration=None):
+        if Value != 0:
             LinearAxis.Move(self,Value+self.Offset,Speed,Time,Acceleration)
         else:
             LinearAxis.Move(self,None,Speed,Time,Acceleration)
@@ -336,7 +336,7 @@ class RotationAxis(Axis):
         Move(self,Value,Speed,Time,Acceleration)
     @property
     def Position(self):
-        return Axis.Position-(self.Max-self.Min)
+        return super().Position-(self.Max-self.Min)
     @Position.setter
     def Position(self, value):
         self.newPosition = value+(self.Max-self.Min)
