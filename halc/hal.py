@@ -353,13 +353,18 @@ class Motor(Actor):
 class StepperMotor(Motor):
     def __init__(self, id, maxRPM=800, parent=None):
         Motor.__init__(self,id,parent)
+        self.Position = 0
         self.GradPerStep = 1.8
         self.maxRPM = maxRPM
         self.Speed(self.maxRPM)
     def Speed(self,NewSpeed=-1):
         self.StepTime = (60/NewSpeed)/(360/self.GradPerStep)
         return 1/(self.StepTime*360)
-    def Step(self,Steps,Direction): pass
+    def Step(self,Steps,Direction):
+        if Direction==0:
+            self.Position += Steps*self.GradPerStep
+        else:
+            self.Position -= Steps*self.GradPerStep
     def Rotate(self,Grad):
         if Grad < 0:
             return self.Step(round(-(Grad)/self.GradPerStep),0)

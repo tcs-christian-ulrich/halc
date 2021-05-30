@@ -84,7 +84,8 @@ class M28BYJ48(hal.StepperMotor,threading.Thread):
         self.IsMoving = True
         self._steps = Steps	
         self._direction = Direction	
-        return
+        hal.StepperMotor.Step(self,Steps,Direction)
+        return Steps*self._speed
     def run(self):
         while threading.main_thread().is_alive():
             if self._steps > 0:

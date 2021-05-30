@@ -4,13 +4,8 @@ from halc import hal
 class TestMotor(hal.StepperMotor):
     def __init__(self, id, parent=None):
         hal.StepperMotor.__init__(self, id, parent=None)
-        self.Position = 0
     def Step(self,Steps,Direction):
         #print("TestMotor.Step "+str(Direction))
-        if Direction==0:
-            self.Position += Steps*self.GradPerStep
-        else:
-            self.Position -= Steps*self.GradPerStep
         return 0 # minimal time to next step
 class MotorTests(unittest.TestCase):
     def setUp(self):
