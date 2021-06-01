@@ -36,7 +36,7 @@ class Module:
                         return a
             return None
         m = iSearch(self,id,typ,Name,unsharpname)
-        if m == None and iSearch ==None:
+        if m == None and unsharpname==None:
             m = iSearch(self,id,typ,Name,True)
         return m
     def __init__(self, id, parent=None):
