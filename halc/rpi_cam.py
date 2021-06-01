@@ -3,20 +3,20 @@ try:
     import cv2,threading,io,time,picamera,picamera.array,queue,logging
     import numpy as np
     class StreamingOutput(object):
-        def __init__(self):
+        def __init__(self,resolution):
+            self.resolution = resolution
             self.frame = None
             self.buffer = io.BytesIO()
             self.condition = threading.Condition()
         def write(self, buf):
-            if buf.startswith(b'\xff\xd8'):
-                # New frame, copy the existing buffer's content and notify all
-                # clients it's available
-                self.buffer.truncate()
-                with self.condition:
-                    self.frame = self.buffer.getvalue()
-                    self.condition.notify_all()
+            self.buffer.truncate()
+            res = self.buffer.write(buf)
+            with self.condition:
                 self.buffer.seek(0)
-            return self.buffer.write(buf)
+                self.frame = picamera.array.bytes_to_rgb(self.buffer.getvalue(),self.resolution)
+                self.condition.notify_all()
+                #print('frame capture (%d)' % len(buf))
+            return res
     class PICamera(hal.Camera):
         def __init__(self, port=-1, parent=None,Name=None):
             if port == -1:
@@ -39,11 +39,12 @@ try:
         def init_capture(self,cam=1):
             self.cam = picamera.PiCamera()
             self.cam.start_preview()
-            time.sleep(2)
-            self.output = StreamingOutput()
+            time.sleep(0.2)
+            self.output = StreamingOutput(self.cam.resolution)
             self.init_start(cam)
         def init_start(self,cam=1):
-            self.cam.start_recording(self.output, splitter_port=cam, format='mjpeg')
+            #splitter_port=cam,
+            self.cam.start_recording(self.output, format='rgb')
         def unload(self):
             self.cam.stop_recording()
             del(self.cam)

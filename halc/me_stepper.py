@@ -41,9 +41,8 @@ class M28BYJ48(hal.StepperMotor,threading.Thread):
     running = False 
     position = 0
 
-    def __init__(self,id, gpio, pin1, pin2, pin3, pin4):
-        threading.Thread.__init__(self)
-        hal.StepperMotor.__init__(self,id)
+    def __init__(self,id, gpio, pin1, pin2, pin3, pin4,parent=None,UseThread=False):
+        hal.StepperMotor.__init__(self,id,round(60/(self.NORMAL*self.REVOLUTION)),parent)
         self.pin1 = pin1
         self.pin2 = pin2
         self.pin3 = pin3
@@ -58,7 +57,9 @@ class M28BYJ48(hal.StepperMotor,threading.Thread):
         self.GPIO = gpio
         self.setFullStepDrive()
         self.GradPerStep = 360.0/self.REVOLUTION
-        return
+        self.UseThread = UseThread
+        if UseThread:
+            threading.Thread.__init__(self)
     # Initialise GPIO pins for this motor
     def Enable(self):
         self.GPIO.setup(self.pin1,'out')
@@ -66,7 +67,8 @@ class M28BYJ48(hal.StepperMotor,threading.Thread):
         self.GPIO.setup(self.pin3,'out')
         self.GPIO.setup(self.pin4,'out')
         self.position=0
-        self.start()
+        if self.UseThread:
+            self.start()
         return	
     # Reset (stop) motor
     def Disable(self):
@@ -82,9 +84,10 @@ class M28BYJ48(hal.StepperMotor,threading.Thread):
         self.IsMoving = True
         self._steps = Steps	
         self._direction = Direction	
-        return
+        hal.StepperMotor.Step(self,Steps,Direction)
+        return Steps*self._speed
     def run(self):
-        while threading.main_thread().isAlive():
+        while threading.main_thread().is_alive():
             if self._steps > 0:
                 if self._direction == self.CLOCKWISE:
                     for pin in range(self._mrange):
