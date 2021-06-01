@@ -11,30 +11,34 @@ class Module:
         """
         result = []
         for m in self.Modules:
+            m.list(id,typ,Name)
             if  ((id is None) or (m._id==id) or (id in m._id))\
             and ((typ is None) or (isinstance(m,typ)))\
             and ((Name is None) or ((m.Name is not None) and ((m.Name == Name) or (unsharpname and (Name in m.Name))))):
                 result.append(m)
                 if breakafterfound:
                     return result
-            else:
-                m.list(id,typ,Name)
         return result
-    def find(self,id=None,typ=None,Name=None,unsharpname=False):
+    def find(self,id=None,typ=None,Name=None,unsharpname=None):
         """ With the find function you can search for Devices/Modules that are Childs of this Module
         just call it with an hardware id of the Module (mac adress, usb vid/pid ...) or an Name (can be set on your own some modules may support names that are avalible in the hardware (e.g. eeprom))
         or an device typ/class
         """
-        for m in self.Modules:
-            if  ((id is None) or (m._id==id) or (id in m._id))\
-            and ((typ is None) or (isinstance(m,typ)))\
-            and ((Name is None) or ((m.Name is not None) and ((m.Name == Name) or (unsharpname and (Name in m.Name))))):
-                return m
-            else:
-                a = m.find(id,typ,Name)
-                if a!=None:
-                    return a
-        return None
+        def iSearch(self,id=None,typ=None,Name=None,unsharpname=None):
+            for m in self.Modules:
+                if  ((id is None) or (m._id==id) or (id in m._id))\
+                and ((typ is None) or (isinstance(m,typ)))\
+                and ((Name is None) or ((m.Name is not None) and ((m.Name == Name) or (unsharpname==True and (Name in m.Name))))):
+                    return m
+                else:
+                    a = m.find(id,typ,Name)
+                    if a!=None:
+                        return a
+            return None
+        m = iSearch(self,id,typ,Name,unsharpname)
+        if m == None and iSearch ==None:
+            m = iSearch(self,id,typ,Name,True)
+        return m
     def __init__(self, id, parent=None):
         self._id = id
         try: self.Modules = []
@@ -47,6 +51,7 @@ class Module:
         if parent:
             parent.Modules.append(self)
         self.logger = logging.getLogger(type(self).__name__)
+        self.lock = threading.Lock()
     def __str__(self):
         if self.Name is not None:
             ret = self.Name+' ('+str(self._id)+')'
