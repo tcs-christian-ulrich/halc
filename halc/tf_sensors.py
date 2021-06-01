@@ -35,6 +35,7 @@ def findDeviceType(id,devicetype):
         elif devicetype == 2102: return BrickletIndustrialQuadRelayV2(id, ipcon)
         else:
             print("Warning: DeviceType "+str(devicetype)+" not found")
+            return None
 class tfMasterBrick(hal.Module):
     def __init__(self, id, devicetype, parent=None):
         tmp = findDeviceType(id,devicetype)
