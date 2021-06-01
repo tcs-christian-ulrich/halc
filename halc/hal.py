@@ -3,7 +3,7 @@ Devices = []
 class Module:
     """ Base Module Class, all other halc Classes are an Module
     """
-    def list(self,id=None,typ=None,Name=None,breakafterfound=False):
+    def list(self,id=None,typ=None,Name=None,breakafterfound=False,unsharpname=False):
         """ With the find function you can search for Devices/Modules that are Childs of this Module
 
         just call it with an hardware id of the Module (mac adress, usb vid/pid ...) or an Name (can be set on your own some modules may support names that are avalible in the hardware (e.g. eeprom))
@@ -13,14 +13,14 @@ class Module:
         for m in self.Modules:
             if  ((id is None) or (m._id==id) or (id in m._id))\
             and ((typ is None) or (isinstance(m,typ)))\
-            and ((Name is None) or ((m.Name is not None) and ((m.Name == Name) or (Name in m.Name)))):
+            and ((Name is None) or ((m.Name is not None) and ((m.Name == Name) or (unsharpname and (Name in m.Name))))):
                 result.append(m)
                 if breakafterfound:
                     return result
             else:
                 m.list(id,typ,Name)
         return result
-    def find(self,id=None,typ=None,Name=None):
+    def find(self,id=None,typ=None,Name=None,unsharpname=False):
         """ With the find function you can search for Devices/Modules that are Childs of this Module
 
         just call it with an hardware id of the Module (mac adress, usb vid/pid ...) or an Name (can be set on your own some modules may support names that are avalible in the hardware (e.g. eeprom))
