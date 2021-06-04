@@ -213,6 +213,7 @@ class MotorController(threading.Thread,Actor):
         self._steps = 0
     def add(self,Action):
         self.Actions.append(Action)
+        Action.Motor.Enable()
     def step(self):
         """ This function is the main function to work all actions, it is called by the controller loop. 
         
@@ -222,6 +223,8 @@ class MotorController(threading.Thread,Actor):
         if len(self.Actions) > 0:
             for Action in self.Actions:
                 if Action.Done():
+                    if Action.Motor.AutoEnable:
+                        Action.Motor.Disable()
                     self.Actions.remove(Action)
                     del(Action)
                 else:
@@ -354,14 +357,18 @@ class Motor(Actor):
     """
     CLOCKWISE = 0
     ANTICLOCKWISE = 1
-    def __init__(self, id, parent=None):
+    def __init__(self, id, parent=None,AutoEnable=True):
         Actor.__init__(self,id,parent)
         self.IsMoving = False
-    def Enable(self): pass
-    def Disable(self): pass
+        self.Enabled = False
+        self.AutoEnable = AutoEnable
+    def Enable(self): 
+        self.Enabled = True
+    def Disable(self): 
+        self.Enabled = False
 class StepperMotor(Motor):
-    def __init__(self, id, maxRPM=800, parent=None):
-        Motor.__init__(self,id,parent)
+    def __init__(self, id, maxRPM=800, parent=None,AutoEnable=True):
+        Motor.__init__(self,id,parent,AutoEnable=AutoEnable)
         self.Position = 0
         self.GradPerStep = 1.8
         self.maxRPM = maxRPM
