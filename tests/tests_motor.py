@@ -6,7 +6,12 @@ class TestMotor(hal.StepperMotor):
         hal.StepperMotor.__init__(self, id, parent=None)
     def Step(self,Steps,Direction):
         #print("TestMotor.Step "+str(Direction))
+        hal.StepperMotor.Step(self,Steps,Direction)
         return 0 # minimal time to next step
+    def Enable(self):
+        self.Enabled = True
+    def Disable(self):
+        self.Enabled = False
 class MotorTests(unittest.TestCase):
     def setUp(self):
         self.mc = hal.MotorController('mc')
@@ -18,6 +23,8 @@ class MotorTests(unittest.TestCase):
             if mm.Done():
                 break
         self.assertGreater(self.motor.Position,15)
+        self.assertTrue(mm.Done())
+        self.assertFalse(self.motor.Enabled)
     def test_directLinearMovementBack(self):
         mm = hal.Movement(self.motor,-15)
         for i in range(15):
@@ -25,14 +32,19 @@ class MotorTests(unittest.TestCase):
             if mm.Done():
                 break
         self.assertLess(self.motor.Position,-15)
+        #self.assertTrue(mm.Done())
+        self.assertFalse(self.motor.Enabled)
     def test_LinearMovement(self):
         self.mc.add(hal.Movement(self.motor,15))
         time.sleep(0.06)
         self.assertGreater(self.motor.Position,15)
+        self.assertFalse(self.motor.Enabled)
     def test_LinearMovementBack(self):
         self.mc.add(hal.Movement(self.motor,-30))
         time.sleep(0.06)
         self.assertLess(self.motor.Position,-15)
+        #self.assertTrue(mm.Done())
+        self.assertFalse(self.motor.Enabled)
 class MotorAxisTests(unittest.TestCase):
     def setUp(self):
         self.mc = hal.MotorController('mc',Autostart=False)
