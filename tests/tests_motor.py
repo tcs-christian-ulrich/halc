@@ -32,7 +32,7 @@ class MotorTests(unittest.TestCase):
             if mm.Done():
                 break
         self.assertLess(self.motor.Position,-15)
-        #self.assertTrue(mm.Done())
+        self.assertTrue(mm.Done())
         self.assertFalse(self.motor.Enabled)
     def test_LinearMovement(self):
         self.mc.add(hal.Movement(self.motor,15))

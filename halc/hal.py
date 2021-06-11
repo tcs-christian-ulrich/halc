@@ -249,7 +249,10 @@ class MotorAction:
         self.ValuePerStep = 1
         self.Position = 0
     def Step(self,Steps=1.0):
-        self.Position += Steps*self.ValuePerStep
+        if self.Value is None or self.Value-self.Position>0: #Direction
+            self.Position += Steps*self.ValuePerStep
+        else:
+            self.Position -= Steps*self.ValuePerStep
     def Done(self):
         if self.Position is not None and self.Value is not None:
             if self.Value > 0:
