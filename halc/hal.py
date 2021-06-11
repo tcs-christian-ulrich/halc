@@ -3,7 +3,7 @@ Devices = []
 class Module:
     """ Base Module Class, all other halc Classes are an Module
     """
-    def list(self,id=None,typ=None,Name=None,breakafterfound=False,unsharpname=False):
+    def list(self,id=None,typ=None,Name=None,breakafterfound=False,unsharpname=None):
         """ With the find function you can search for Devices/Modules that are Childs of this Module
 
         just call it with an hardware id of the Module (mac adress, usb vid/pid ...) or an Name (can be set on your own some modules may support names that are avalible in the hardware (e.g. eeprom))
@@ -12,7 +12,7 @@ class Module:
         result = []
         for m in self.Modules:
             m.list(id,typ,Name)
-            if  ((id is None) or (m._id==id) or (id in m._id))\
+            if  ((id is None) or (m._id==id) or (unsharpname==True and (id in m._id)))\
             and ((typ is None) or (isinstance(m,typ)))\
             and ((Name is None) or ((m.Name is not None) and ((m.Name == Name) or (unsharpname and (Name in m.Name))))):
                 result.append(m)
@@ -26,7 +26,7 @@ class Module:
         """
         def iSearch(self,id=None,typ=None,Name=None,unsharpname=None):
             for m in self.Modules:
-                if  ((id is None) or (m._id==id) or (id in m._id))\
+                if  ((id is None) or (m._id==id) or (unsharpname==True and (id in m._id)))\
                 and ((typ is None) or (isinstance(m,typ)))\
                 and ((Name is None) or ((m.Name is not None) and ((m.Name == Name) or (unsharpname==True and (Name in m.Name))))):
                     return m
@@ -50,8 +50,16 @@ class Module:
             parent = Devices
         if parent:
             parent.Modules.append(self)
+        self.parent = parent
         self.logger = logging.getLogger(type(self).__name__)
         self.lock = threading.Lock()
+    def destroy(self):
+        try:
+            self.parent.Modules.remove(self)
+            del(self)
+        except: pass
+    def __del__(self):
+        self.destroy()
     def __str__(self):
         if self.Name is not None:
             ret = self.Name+' ('+str(self._id)+')'
