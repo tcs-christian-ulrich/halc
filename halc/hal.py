@@ -11,7 +11,9 @@ class Module:
         """
         result = []
         for m in self.Modules:
-            m.list(id,typ,Name)
+            nres = m.list(id,typ,Name)
+            for res in nres:
+                result.append(res)
             if  ((id is None) or (m._id==id) or (unsharpname==True and (id in m._id)))\
             and ((typ is None) or (isinstance(m,typ)))\
             and ((Name is None) or ((m.Name is not None) and ((m.Name == Name) or (unsharpname and (Name in m.Name))))):

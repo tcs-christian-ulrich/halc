@@ -105,7 +105,6 @@ class M28BYJ48(hal.StepperMotor,threading.Thread):
                 self._decrementPosition()
             self._steps -= 1
             hal.StepperMotor.Step(self,1,Direction)
-        self._direction = Direction	
         return Steps*self._speed
     def run(self):
         while threading.main_thread().is_alive() and self.Enabled:
