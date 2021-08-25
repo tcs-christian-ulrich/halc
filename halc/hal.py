@@ -555,7 +555,7 @@ def EnsureDevice(typ,name=None,WaitTime=0):
                 logging.error("**ERROR "+name+" not found")
         return False
     if FirstSearch == False:
-        logging.warning("**STEPEND OK")
+        logging.warning("**STEPEND "+str(dev._id))
     return True
 def showTree():
     """ Shows the Device Tree as ASCII Tree
