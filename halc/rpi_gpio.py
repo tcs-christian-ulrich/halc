@@ -22,6 +22,7 @@ class rpiGPIO(hal.GPIOActor):
                 self.Pins[str(p)] = gpiozero.DigitalOutputDevice(p)
             if direction == 'tristate':
                 self.Pins[str(p)] = gpiozero.DigitalInputDevice(p)
+            return True
         except BaseException as e:
             logging.debug("Exception:"+str(e))
             return False
