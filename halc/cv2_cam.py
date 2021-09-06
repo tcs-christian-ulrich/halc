@@ -52,7 +52,8 @@ try:
                 self.logger.debug("capture failed, trying to re-initialize")
                 self.cap.release()
                 self.cap = None
-                self.cap = cv2.VideoCapture(cam, cv2.CAP_V4L2)
+                self.init_capture(self._id)
+                ret, img = self.cap.read()
             #self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25) # expose manual
             #self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.75) # auto expose
             #self.cap.set(cv2.CAP_PROP_EXPOSURE, -7.0) # manual expose value 
