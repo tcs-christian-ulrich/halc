@@ -523,12 +523,9 @@ class NetworkPOESwitch(NetworkSwitch):
         """
 class ABBusController(BusController): pass
 Devices = Module('/')
-def EnsureDevice(typ,name=None,id=None,WaitTime=0):
+def EnsureDevice(typ,name=None,WaitTime=0):
     """Function to ensure (wait) for an Device or fails if the Device is not there within an given amount of time
     """
-    if name == None\
-    and id is not None:
-        name = id
     WaitTime += 0.1
     FirstSearch = True
     while WaitTime>0:
