@@ -7,6 +7,8 @@ class BasicTests(unittest.TestCase):
         self.sensor1.Name = 'Pon'
         self.sensor2 = hal.Sensor('P')
         self.sensor2.Name = 'P'
+        self.sensor3 = hal.Sensor('Aoff')
+        self.sensor3.Name = 'Aisoff'
     def tearDown(self) -> None:
         self.sensor1.destroy()
         self.sensor2.destroy()
@@ -21,5 +23,9 @@ class BasicTests(unittest.TestCase):
         self.assertEqual(hal.Devices.find(None,None,'Pon'),self.sensor1)
     def testFindUnsharpName(self):
         self.assertEqual(hal.Devices.find(None,None,'P',True),self.sensor1)
+    def testEnsureDeviceName(self):
+        self.assertTrue(hal.EnsureDevice(hal.Sensor,'Aisoff',0.1))
+    def testEnsureDeviceID(self):
+        self.assertTrue(hal.EnsureDevice(hal.Sensor,'Aoff',0.1))
 if __name__ == '__main__':
     unittest.main()
