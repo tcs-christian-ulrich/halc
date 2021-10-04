@@ -16,7 +16,7 @@ class MPCamera(hal.Grabber):
             os.remove("00000001.png")
         try:
             self.h,  self.w = img.shape[:2]
-            cv2.resize(img,(1024,768))
+            img = cv2.resize(img,(1024,768))
         except:
             return False
         return img
