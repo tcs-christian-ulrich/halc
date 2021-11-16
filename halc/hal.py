@@ -172,7 +172,7 @@ class VoltageSensor(ADC):
         self.measurements=measurements
         ADC.__init__(self,id,parent)
         self.Calibration = 0.0
-    def Voltage(self,Port=1):
+    def Voltage(self,Port=1,PortLow=2):
         return -1
     def Sample(self,Port=1):
         return self.Voltage(Port)
