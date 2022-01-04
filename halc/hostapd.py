@@ -91,12 +91,10 @@ class AccessPoint(hal.NetworkSwitch,pyaccesspoint.AccessPoint):
         logging.debug('created interface: mon.' + self.wlan + ' on IP: ' + self.ip)
         r = self._execute_shell(s)
         logging.debug(r)
-        # print('sleeping for 2 seconds.')
         logging.debug('wait..')
         self._execute_shell('sleep 2')
         i = self.ip.rindex('.')
         ipparts = self.ip[0:i]
-
         # enable forwarding in sysctl.
         logging.debug('enabling forward in sysctl.')
         r = self._execute_shell('sysctl -w net.ipv4.ip_forward=1')
@@ -148,7 +146,6 @@ class AccessPoint(hal.NetworkSwitch,pyaccesspoint.AccessPoint):
         s = 'sudo hostapd -B {}'.format(self.hostapd_config_path)
         logging.debug(s)
         logging.debug('running hostapd')
-        # print('sleeping for 2 seconds.')
         logging.debug('wait..')
         self._execute_shell('sleep 2')
         r = self._execute_shell(s)
@@ -186,6 +183,14 @@ class AccessPoint(hal.NetworkSwitch,pyaccesspoint.AccessPoint):
         # self.execute_shell('ip addr flush ' + wlan)
         logging.debug('hotspot has stopped.')
         return True
-    def __del__(self):
-        print("dsestr")
+    def release(self):
         self._stop_router()
+    def __del__(self):
+        self.release()
+        super().__del__(self)
+def Cleanup():
+    AP = hal.Devices.find(None,AccessPoint)
+    if AP:
+        AP.release()
+        del(AP)
+        AP = None
