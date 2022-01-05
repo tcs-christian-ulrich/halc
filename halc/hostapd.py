@@ -49,14 +49,16 @@ rsn_pairwise=CCMP
 #For No encryption, you don't need to set any options
 '''
 class AccessPoint(hal.NetworkSwitch,pyaccesspoint.AccessPoint): 
-    def __init__(self,SSID='TestNetwork',Password=None,IP='192.168.2.1',interface='wlan0', inet=None, netmask='255.255.255.0',
-                 password='1234567890'):
+    def __init__(self,SSID='TestNetwork',Password='1234567890',IP='192.168.2.1',interface='wlan0', inet=None, netmask='255.255.255.0',
+                 enableNat=True,enableDhcp=True):
         self.wlan = interface
         self.inet = inet
         self.ip = IP
         self.netmask = netmask
         self.ssid = SSID
         self.password = Password
+        self.nat = enableNat
+        self.dhcp = enableDhcp
         self.root_directory = "/tmp"
         self.hostapd_config_path = os.path.join(self.root_directory, "hostapd.config")
         hal.NetworkSwitch.__init__(self,self.ip)
@@ -95,12 +97,13 @@ class AccessPoint(hal.NetworkSwitch,pyaccesspoint.AccessPoint):
         self._execute_shell('sleep 2')
         i = self.ip.rindex('.')
         ipparts = self.ip[0:i]
-        # enable forwarding in sysctl.
-        logging.debug('enabling forward in sysctl.')
-        r = self._execute_shell('sysctl -w net.ipv4.ip_forward=1')
-        logging.debug(r.strip())
+        if self.nat:
+            # enable forwarding in sysctl.
+            logging.debug('enabling forward in sysctl.')
+            r = self._execute_shell('sysctl -w net.ipv4.ip_forward=1')
+            logging.debug(r.strip())
 
-        if self.inet is not None:
+        if self.inet is not None and self.nat:
             # enable forwarding in iptables.
             logging.debug('creating NAT using iptables: {} <-> {}'.format(self.wlan, self.inet))
             self._execute_shell('iptables -P FORWARD ACCEPT')
@@ -117,18 +120,19 @@ class AccessPoint(hal.NetworkSwitch,pyaccesspoint.AccessPoint):
                     .format(self.inet, self.wlan))
             self._execute_shell('iptables -A FORWARD -i {} -o {} -j ACCEPT'.format(self.wlan, self.inet))
 
-        # allow traffic to/from wlan
-        self._execute_shell('iptables -A OUTPUT --out-interface {} -j ACCEPT'.format(self.wlan))
-        self._execute_shell('iptables -A INPUT --in-interface {} -j ACCEPT'.format(self.wlan))
+        if self.nat:
+            # allow traffic to/from wlan
+            self._execute_shell('iptables -A OUTPUT --out-interface {} -j ACCEPT'.format(self.wlan))
+            self._execute_shell('iptables -A INPUT --in-interface {} -j ACCEPT'.format(self.wlan))
 
-        # start dnsmasq
-        s = 'dnsmasq --dhcp-authoritative --interface={} --dhcp-range={}.20,{}.100,{},4h'\
-            .format(self.wlan, ipparts, ipparts, self.netmask)
-
-        logging.debug('running dnsmasq')
-        logging.debug(s)
-        r = self._execute_shell(s)
-        logging.debug(r)
+        if self.dhcp:
+            # start dnsmasq
+            s = 'dnsmasq --dhcp-authoritative --interface={} --dhcp-range={}.20,{}.100,{},4h'\
+                .format(self.wlan, ipparts, ipparts, self.netmask)
+            logging.debug('running dnsmasq')
+            logging.debug(s)
+            r = self._execute_shell(s)
+            logging.debug(r)
 
         # ~ f = open(os.getcwd() + '/hostapd.tem','r')
         # ~ lout=[]
@@ -159,28 +163,29 @@ class AccessPoint(hal.NetworkSwitch,pyaccesspoint.AccessPoint):
         # stop hostapd
         logging.debug('stopping hostapd')
         os.system('sudo pkill hostapd')
-
-        # stop dnsmasq
-        logging.debug('stopping dnsmasq')
-        os.system('killall dnsmasq')
-        # disable forwarding in iptables.
-        logging.debug('disabling forward rules in iptables.')
-        self._execute_shell('iptables -P FORWARD DROP')
+        if self.dhcp:
+            # stop dnsmasq
+            logging.debug('stopping dnsmasq')
+            os.system('killall dnsmasq')
+        if self.nat:
+            # disable forwarding in iptables.
+            logging.debug('disabling forward rules in iptables.')
+            self._execute_shell('iptables -P FORWARD DROP')
 
         # delete iptables rules that were added for wlan traffic.
-        if self.wlan != None:
+        if self.wlan != None and self.nat:
             self._execute_shell('iptables -D OUTPUT --out-interface {} -j ACCEPT'.format(self.wlan))
             self._execute_shell('iptables -D INPUT --in-interface {} -j ACCEPT'.format(self.wlan))
-        self._execute_shell('iptables --table nat --delete-chain')
-        self._execute_shell('iptables --table nat -F')
-        self._execute_shell('iptables --table nat -X')
-
-        # disable forwarding in sysctl.
-        logging.debug('disabling forward in sysctl.')
-        r = self._execute_shell('sysctl -w net.ipv4.ip_forward=0')
-        logging.debug(r.strip())
-        # self.execute_shell('ifconfig ' + wlan + ' down'  + IP + ' netmask ' + Netmask)
-        # self.execute_shell('ip addr flush ' + wlan)
+        if self.nat:
+            self._execute_shell('iptables --table nat --delete-chain')
+            self._execute_shell('iptables --table nat -F')
+            self._execute_shell('iptables --table nat -X')
+            # disable forwarding in sysctl.
+            logging.debug('disabling forward in sysctl.')
+            r = self._execute_shell('sysctl -w net.ipv4.ip_forward=0')
+            logging.debug(r.strip())
+            # self.execute_shell('ifconfig ' + wlan + ' down'  + IP + ' netmask ' + Netmask)
+            # self.execute_shell('ip addr flush ' + wlan)
         logging.debug('hotspot has stopped.')
         return True
     def release(self):
