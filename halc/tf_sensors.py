@@ -357,19 +357,17 @@ class tfEnumerate(threading.Thread):
     def run(self):
         global ipcon
         isexception = False
-        while self.is_alive():
-            try:
-                ipcon = IPConnection()
-                if ipcon.get_connection_state()!=IPConnection.CONNECTION_STATE_CONNECTED:
-                    ipcon.connect("localhost", 4223)
-                    ipcon.register_callback(IPConnection.CALLBACK_ENUMERATE, cb_enumerate)
-                    ipcon.time_out = 0.5
-                ipcon.enumerate()
-                time.sleep(0.3)
-            except:
-                logging.debug("Tinkerforge:failed connecting to IP Connection")
-                time.sleep(0.3)
-                pass
+        try:
+            ipcon = IPConnection()
+            if ipcon.get_connection_state()!=IPConnection.CONNECTION_STATE_CONNECTED:
+                ipcon.connect("localhost", 4223)
+                ipcon.register_callback(IPConnection.CALLBACK_ENUMERATE, cb_enumerate)
+                ipcon.time_out = 0.5
+            ipcon.enumerate()
+            time.sleep(0.3)
+        except:
+            logging.debug("Tinkerforge:failed connecting to IP Connection")
+            pass
 enumerate = tfEnumerate() 
 enumerate.start()
 def deinit():
