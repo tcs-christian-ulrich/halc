@@ -13,11 +13,6 @@ class MPCamera(hal.Grabber):
         img = cv2.imread("00000001.png")
         if self.logger.getEffectiveLevel() < logging.DEBUG:
             os.remove("00000001.png")
-        try:
-            self.h,  self.w = img.shape[:2]
-            img = cv2.resize(img,(1024,768))
-        except:
-            return False
         return img
     def read(self,CloseCapture = False):
         return self.capture(self.Device,CloseCapture = CloseCapture)
