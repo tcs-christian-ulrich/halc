@@ -490,10 +490,10 @@ if __name__ == "__main__":
         MCP.__del__()        
 
 import hal
-class MCP230xx(hal.GPIOActor,MCP230XX):
+class MCP23017(hal.GPIOActor,MCP230XX):
     def __init__(self, address, regScheme='16bit',parent=None):
         hal.GPIOActor.__init__(address, parent=parent)
-        MCP230XX.__init__('MCP230xx',address,regScheme=regScheme)
+        MCP230XX.__init__('MCP23017',address,regScheme=regScheme)
     def setup(self, port, direction):
         if direction == 'in':
             port = self.getPin(port)
@@ -501,3 +501,7 @@ class MCP230xx(hal.GPIOActor,MCP230XX):
         if direction == 'out':
             self.set_mode(port, 'output')
         return True
+    def input(self, port):
+        return MCP230XX.input(self.getPin(port))
+    def output(self, port, val):
+        return MCP230XX.output(self,self.getPin(port),val)

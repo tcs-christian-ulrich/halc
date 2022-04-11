@@ -365,9 +365,6 @@ class ina226:
     
     def isAlert(self):
         return ((self.getMaskEnable() & INA226_BIT_AFF) == INA226_BIT_AFF)
- 
-#-----------------------Demo Program--------------------------------------
-
 def demo():
     try:
         print("Configuring INA226..")
@@ -398,13 +395,14 @@ def demo():
         print("There has been an exception, Find detais below:")
         print(str(e))
         iSensor.close()
-    
+
   
 import hal
 class INA226(ina226,hal.VoltageSensor,hal.CurrentSensor):
     def __init__(self, address, measurements=1, parent=None):
         hal.VoltageSensor.__init__(id=address, measurements=measurements, parent=parent)
         ina226.__init__(ina226_addr=address)
+        self.configure(avg = ina226_averages_t['INA226_AVERAGES_4'],)
     def Voltage(self, Port=1):
         return self.readBusVoltage()
     def Current(self, Port=1, measurements=None):
