@@ -396,12 +396,12 @@ def demo():
         print(str(e))
         iSensor.close()
 
-  
-import hal
+from . import hal
 class INA226(ina226,hal.VoltageSensor,hal.CurrentSensor):
-    def __init__(self, address, measurements=1, parent=None):
-        hal.VoltageSensor.__init__(id=address, measurements=measurements, parent=parent)
-        ina226.__init__(ina226_addr=address)
+    def __init__(self, address, measurements=1, i2c_bus=0, parent=None):
+        hal.VoltageSensor.__init__(self,id=str(address), measurements=measurements, parent=parent)
+        hal.CurrentSensor.__init__(self,id=str(address), measurements=measurements, parent=parent)
+        ina226.__init__(self,ina226_addr=address,i2c_driver_type='SBC_LINUX_SMBUS',i2c_bus_number=i2c_bus)
         self.configure(avg = ina226_averages_t['INA226_AVERAGES_4'],)
     def Voltage(self, Port=1):
         return self.readBusVoltage()
