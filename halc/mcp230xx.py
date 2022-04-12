@@ -439,7 +439,7 @@ if __name__ == "__main__":
 
     # set up GPIO settings
        
-    MCP = MCP230XX('MCP23017', address, '16bit')
+    MCP = MCP230XX('MCP23017', address, 1, '16bit')
 
     for i in range(0,22):
         print(hex(MCP.single_access_read(i)))
@@ -493,11 +493,13 @@ class MCP23017(hal.GPIOActor,MCP230XX):
         hal.GPIOActor.__init__(self,str(address), parent=parent)
         MCP230XX.__init__(self,'MCP23017',address,i2c_bus,regScheme=regScheme)
     def setup(self, port, direction):
+        port = self.getPin(port)
         if direction == 'in':
-            port = self.getPin(port)
             self.set_mode(port, 'input')
-        if direction == 'out':
+        elif direction == 'out':
             self.set_mode(port, 'output')
+        else:
+            return False
         return True
     def input(self, port):
         return MCP230XX.input(self.getPin(port))
