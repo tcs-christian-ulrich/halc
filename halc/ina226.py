@@ -30,6 +30,7 @@ import time
 import math
 import ctypes
 import sys
+import logging
 
 PYTHON_SMBUS_LIB_PRESENT = True
 PYTHON_AARDVARK_LIB_PRESENT = True
@@ -121,12 +122,12 @@ class ina226:
     def __init__(self,ina226_addr = INA226_ADDRESS, i2c_bus_number=I2C_DEFAULT_BUS_NUMBER, i2c_clk_Khz=I2C_DEFAULT_CLK_KHZ, i2c_driver_type = I2C_DRIVER):                
 
         if PYTHON_AARDVARK_LIB_PRESENT is False and PYTHON_SMBUS_LIB_PRESENT is False:
-            print("Neither PYAARDVARK nor SMBUS lib is installed, Please install an appropriate one and try again.")
+            logging.error("Neither PYAARDVARK nor SMBUS lib is installed, Please install an appropriate one and try again.")
             sys.exit(0)
         
         if i2c_driver_type == 'AARDVARK':
             if PYTHON_AARDVARK_LIB_PRESENT is False:
-                print('PYAARDVARK Driver is not installed, Please install and Try again.')
+                logging.error('PYAARDVARK Driver is not installed, Please install and Try again.')
                 sys.exit(0)
             self.i2c_bus = pyaardvark.open(i2c_bus_number)
             self.i2c_bus.i2c_bitrate = i2c_clk_Khz
@@ -135,16 +136,16 @@ class ina226:
             
         elif i2c_driver_type == 'SBC_LINUX_SMBUS':
             if PYTHON_SMBUS_LIB_PRESENT is False:
-                print('PYTHON SMBUS Driver is not installed, Please install and Try again.')
+                logging.error('PYTHON SMBUS Driver is not installed, Please install and Try again.')
                 sys.exit(0)
             self.i2c_bus = smbus.SMBus(i2c_bus_number)
             self.readRegister16 =  self.readRegister16_SMBUS
             self.writeRegister16 =  self.writeRegister16_SMBUS 
             if i2c_clk_Khz != I2C_DEFAULT_CLK_KHZ:
-                print('Python SMBUS linux driver doesn\'t provide I2C CLK Freq Manipulation support yet,')
-                print('So Ignoring i2c_clk_khz param and using default.')
+                logging.warning('Python SMBUS linux driver doesn\'t provide I2C CLK Freq Manipulation support yet,')
+                logging.warning('So Ignoring i2c_clk_khz param and using default.')
         else:
-            print('Unknown I2C DRIVER Specified, available Options are : AARDVARK, SBC_LINUX_SMBUS')
+            logging.error('Unknown I2C DRIVER Specified, available Options are : AARDVARK, SBC_LINUX_SMBUS')
         
         self.ina226_address = ina226_addr
         self.vBusMax = 36
@@ -230,10 +231,10 @@ class ina226:
     
         minimumLSB = float(iMaxExcepted) / 32767
         
-        print("minimumLSB:"+str(minimumLSB))
+        logging.debug("minimumLSB:"+str(minimumLSB))
         
         self.currentLSB = int((minimumLSB * 100000000))
-        print("currentLSB:"+str(self.currentLSB))
+        logging.debug("currentLSB:"+str(self.currentLSB))
         self.currentLSB /= 100000000.0
         self.currentLSB /= 0.0001
         self.currentLSB = math.ceil(self.currentLSB)
@@ -242,8 +243,8 @@ class ina226:
         self.powerLSB = self.currentLSB * 25;
         
         
-        print("powerLSB:"+str(self.powerLSB))
-        print("rshunt:"+str(self.rShunt))
+        logging.debug("powerLSB:"+str(self.powerLSB))
+        logging.debug("rshunt:"+str(self.rShunt))
         
         calibrationValue = int(((0.00512) / (self.currentLSB * self.rShunt))) #if we get error need to convert this to unsigned int 16 bit instead
     
