@@ -39,7 +39,8 @@ class rpiGPIO(hal.GPIOActor):
     def input(self,port):
         try:
             pin = self.getPin(port)
-            return self.Pins[str(pin)].value()
+            inp = self.Pins[str(pin)]
+            return inp.value
         except BaseException as e:
             logging.debug("Exception:"+str(e))
-            return False
+            return None
