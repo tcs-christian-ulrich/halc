@@ -403,8 +403,11 @@ class INA226(ina226,hal.VoltageSensor,hal.CurrentSensor):
         hal.VoltageSensor.__init__(self,id=str(address), measurements=measurements, parent=parent)
         hal.CurrentSensor.__init__(self,id=str(address), measurements=measurements, parent=parent)
         ina226.__init__(self,ina226_addr=address,i2c_driver_type='SBC_LINUX_SMBUS',i2c_bus_number=i2c_bus)
+        self.shunt = shunt
+        self.config()
+    def config(self):
         self.configure(avg = ina226_averages_t['INA226_AVERAGES_1'],)
-        self.calibrate(rShuntValue=shunt)
+        self.calibrate(rShuntValue=self.shunt)
     def Voltage(self, Port=1):
         try:
             return self.readBusVoltage()
@@ -412,11 +415,21 @@ class INA226(ina226,hal.VoltageSensor,hal.CurrentSensor):
             return self.readBusVoltage()
     def Current(self, Port=1, measurements=None):
         try:
-            res = self.readShuntCurrent()
-            if self.isAlert():
-                return None
-            if self.isMathOverflow():
-                return None
+            retry = 0
+            res = 0
+            while retry < 5 and res == 0:
+                res = round(self.readShuntCurrent()*1000,5)
+                if self.isAlert():
+                    return None
+                if self.isMathOverflow():
+                    return None
+                if res == 0:
+                    self.config()
+                    logging.debug('re-config')
+                retry += 1
             return res
         except:
-            return self.readShuntCurrent()
+            try:
+                return round(self.readShuntCurrent()*1000,5)
+            except:
+                return None
