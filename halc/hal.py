@@ -464,7 +464,7 @@ class GPIOActor(Actor):
     def setName(self,port,Name):
         self.Names[Name] = port
     def getPin(self,port):
-        if isinstance(port, str): 
+        if isinstance(port, str) and port in self.Names: 
             pin = self.Names[port]
         else:
             pin = port
