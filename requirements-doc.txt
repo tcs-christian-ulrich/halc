@@ -1,5 +1,5 @@
-mkdocs
+mkdocs                             1.3.0
 #mkdocs-mermaid-plugin
 git+https://github.com/pugong/mkdocs-mermaid-plugin
-mkdocstrings
-mkdocs-material
+mkdocstrings                       0.18.1
+mkdocs-material                    8.2.9
