@@ -7,6 +7,7 @@ try:
     from tinkerforge.brick_master import BrickMaster
     from tinkerforge.brick_servo import BrickServo
     from tinkerforge.bricklet_io16 import BrickletIO16
+    from tinkerforge.bricklet_io16_v2 import BrickletIO16V2
     from tinkerforge.bricklet_color import BrickletColor
     from tinkerforge.bricklet_color_v2 import BrickletColorV2
     from tinkerforge.bricklet_dual_relay import BrickletDualRelay
@@ -26,7 +27,8 @@ def findDeviceType(id,devicetype):
         elif devicetype == 14: return BrickServo(id, ipcon)
         elif devicetype == 227: return BrickletVoltageCurrent(id, ipcon)
         elif devicetype == 2105: return BrickletVoltageCurrentV2(id, ipcon)
-        elif devicetype == 100: return BrickletIO16(id, ipcon)
+        elif devicetype == 28: return BrickletIO16(id, ipcon)
+        elif devicetype == 2114: return BrickletIO16V2(id, ipcon)
         elif devicetype == 243: return BrickletColor(id, ipcon)
         elif devicetype == 2128: return BrickletColorV2(id, ipcon)
         elif devicetype == 26: return BrickletDualRelay(id, ipcon)
@@ -174,6 +176,28 @@ class tfRelaisBricklet(hal.Relais):
             return  ret
         except:
             return hal.Sensor.__str__(self)
+class tfIOBricklet(hal.GPIOActor):
+    def __init__(self, id, devicetype, parent=None):
+        tmp = findDeviceType(id,devicetype)
+        hal.Actor.__init__(self,id,parent)
+        self.Device = tmp
+    def setup(self,port,direction):
+        port = self.getPin(port)
+        if direction == 'in':
+            self.Device.set_configuration(port,'i',True)
+        if direction == 'out':
+            self.Device.set_configuration(port,'o',False)
+        if direction == 'tristate':
+            self.Device.set_configuration(port,'i',False)
+    def output(self,port,val):
+        port = self.getPin(port)
+        if val:
+            self.Device.set_selected_value(port,1)
+        else:
+            self.Device.set_selected_value(port,0)
+    def input(self,port):
+        port = self.getPin(port)
+        return self.Device.get_value()[port]
 def cb_enumerate(uid, connected_uid, position, hardware_version, firmware_version,device_identifier, enumeration_type):# Register incoming enumeration
    #print("cb_enumerate():",uid, connected_uid, position, hardware_version, firmware_version ,device_identifier)
    if enumeration_type == IPConnection.ENUMERATION_TYPE_DISCONNECTED:
@@ -191,9 +215,10 @@ def cb_enumerate(uid, connected_uid, position, hardware_version, firmware_versio
             if hal.Devices.find(uid,hal.VoltageSensor) == None:
                 tfVoltageSensor(uid,device_identifier,aParent)
                 tfCurrentSensor(uid,device_identifier,aParent)
-        if device_identifier == 100: #io16 Bricklet
-            if hal.Devices.find(uid,hal.IOPort) == None:
-                tfIOPort(uid,device_identifier,aParent)
+        if device_identifier == 28\
+        or device_identifier == 2114: #io16 Bricklet
+            if hal.Devices.find(uid,hal.tfIOBricklet) == None:
+                tfIOBricklet(uid,device_identifier,aParent)
         if device_identifier == 243 or device_identifier == 2128: #Color Bricklet
             if hal.Devices.find(uid,hal.ColorSensor) == None:
                 tfColorSensor(uid,device_identifier,aParent)
