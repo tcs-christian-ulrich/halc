@@ -22,14 +22,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import time, sys, smbus
-
-
 class MCP230XX:
 
-    def __init__(self, chip, i2cAddress, regScheme = '16bit'):
+    def __init__(self, chip, i2cAddress, i2c_bus=1, regScheme = '16bit'):
 
         self.i2cAddress = i2cAddress
-        self.bus =smbus.SMBus(1)
+        self.bus =smbus.SMBus(i2c_bus)
         self.chip = chip
 
         if self.chip == 'MCP23008':
@@ -441,7 +439,7 @@ if __name__ == "__main__":
 
     # set up GPIO settings
        
-    MCP = MCP230XX('MCP23017', address, '16bit')
+    MCP = MCP230XX('MCP23017', address, 1, '16bit')
 
     for i in range(0,22):
         print(hex(MCP.single_access_read(i)))
@@ -489,17 +487,19 @@ if __name__ == "__main__":
     finally:        
         MCP.__del__()        
 
-import hal
+from . import hal
 class MCP23017(hal.GPIOActor,MCP230XX):
-    def __init__(self, address, regScheme='16bit',parent=None):
-        hal.GPIOActor.__init__(address, parent=parent)
-        MCP230XX.__init__('MCP23017',address,regScheme=regScheme)
+    def __init__(self, address, regScheme='16bit',i2c_bus=0,parent=None):
+        hal.GPIOActor.__init__(self,str(address), parent=parent)
+        MCP230XX.__init__(self,'MCP23017',address,i2c_bus,regScheme=regScheme)
     def setup(self, port, direction):
+        port = self.getPin(port)
         if direction == 'in':
-            port = self.getPin(port)
             self.set_mode(port, 'input')
-        if direction == 'out':
+        elif direction == 'out':
             self.set_mode(port, 'output')
+        else:
+            return False
         return True
     def input(self, port):
         return MCP230XX.input(self.getPin(port))
