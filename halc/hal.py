@@ -523,7 +523,7 @@ class NetworkPOESwitch(NetworkSwitch):
         """
 class ABBusController(BusController): pass
 Devices = Module('/')
-def EnsureDevice(typ,name=None,WaitTime=0):
+def EnsureDevice(typ,name=None,WaitTime=0,Errorcode=999):
     """Function to ensure (wait) for an Device or fails if the Device is not there within an given amount of time
     """
     WaitTime += 0.1
@@ -540,19 +540,19 @@ def EnsureDevice(typ,name=None,WaitTime=0):
             typname = typname[typname.find('.')+1:]
         if FirstSearch == True:
             if name is None:
-                logging.warning("**STEP 999 waiting for device "+typname)
+                logging.warning("**STEP "+str(Errorcode)+" waiting for device "+typname)
             else:
-                logging.warning("**STEP 999 waiting for device "+name)
+                logging.warning("**STEP "+str(Errorcode)+" waiting for device "+name)
             FirstSearch = False
         time.sleep(0.1)
         WaitTime-=0.1
     if dev == None:
         if name is None:
             if FirstSearch == False:
-                logging.warning("**ERROR "+typname+" not found")
+                logging.warning("**ERROR "+str(Errorcode)+" "+typname+" not found")
         else:
             if FirstSearch == False:
-                logging.error("**ERROR "+name+" not found")
+                logging.error("**ERROR "+str(Errorcode)+" "+name+" not found")
         return False
     if FirstSearch == False:
         logging.warning("**STEPEND "+str(dev._id))
