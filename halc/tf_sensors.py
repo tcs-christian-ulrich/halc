@@ -184,17 +184,54 @@ class tfIOBricklet(hal.GPIOActor):
     def setup(self,port,direction):
         port = self.getPin(port)
         if direction == 'in':
-            self.Device.set_configuration(port,'i',True)
+            if type(self.Device) is BrickletIO16:
+                if port < 8:
+                    tmp = self.Device.get_port_configuration('a').direction_mask
+                    tmp = tmp | (1<<port)
+                    self.Device.set_port_configuration('a',tmp,'i',True)
+                else:
+                    tmp = self.Device.get_port_configuration('b').direction_mask
+                    tmp = tmp | (1<<(port-8))
+                    self.Device.set_port_configuration('b',tmp,'i',True)
+            else:
+                self.Device.set_configuration(port,'i',True)
         if direction == 'out':
-            self.Device.set_configuration(port,'o',False)
+            if type(self.Device) is BrickletIO16:
+                if port < 8:
+                    tmp = self.Device.get_port_configuration('a').direction_mask ^ 0xFF
+                    tmp = tmp | (1<<port)
+                    self.Device.set_port_configuration('a',tmp,'o',False)
+                else:
+                    tmp = self.Device.get_port_configuration('b').direction_mask ^ 0xFF
+                    tmp = tmp | (1<<(port-8))
+                    self.Device.set_port_configuration('b',tmp,'o',False)
+            else:
+                self.Device.set_configuration(port,'o',False)
         if direction == 'tristate':
-            self.Device.set_configuration(port,'i',False)
+            if type(self.Device) is BrickletIO16:
+                if port < 8:
+                    tmp = self.Device.get_port_configuration('a').direction_mask
+                    tmp = tmp | (1<<port)
+                    self.Device.set_port_configuration('a',tmp,'i',False)
+                else:
+                    tmp = self.Device.get_port_configuration('b').direction_mask
+                    tmp = tmp | (1<<(port-8))
+                    self.Device.set_port_configuration('b',tmp,'i',False)
+            else:
+                self.Device.set_configuration(port,'i',False)
     def output(self,port,val):
         port = self.getPin(port)
         if val:
-            self.Device.set_selected_value(port,1)
+            val = 1
         else:
-            self.Device.set_selected_value(port,0)
+            val = 0
+        if type(self.Device) is BrickletIO16:
+            if port < 8:
+                self.Device.set_selected_values('a',(1<<port),(val<<port))
+            else:
+                self.Device.set_selected_values('b',(1<<(port-8)),(val<<(port-8)))
+        else:
+            self.Device.set_selected_value(port,val)
     def input(self,port):
         port = self.getPin(port)
         return self.Device.get_value()[port]
@@ -217,7 +254,7 @@ def cb_enumerate(uid, connected_uid, position, hardware_version, firmware_versio
                 tfCurrentSensor(uid,device_identifier,aParent)
         if device_identifier == 28\
         or device_identifier == 2114: #io16 Bricklet
-            if hal.Devices.find(uid,hal.tfIOBricklet) == None:
+            if hal.Devices.find(uid,tfIOBricklet) == None:
                 tfIOBricklet(uid,device_identifier,aParent)
         if device_identifier == 243 or device_identifier == 2128: #Color Bricklet
             if hal.Devices.find(uid,hal.ColorSensor) == None:
