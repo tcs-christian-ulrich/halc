@@ -13,6 +13,8 @@ try:
     from tinkerforge.bricklet_dual_relay import BrickletDualRelay
     from tinkerforge.bricklet_industrial_dual_relay import BrickletIndustrialDualRelay
     from tinkerforge.bricklet_industrial_quad_relay_v2 import BrickletIndustrialQuadRelayV2
+    from tinkerforge.bricklet_industrial_quad_relay import BrickletIndustrialQuadRelay
+    from tinkerforge.bricklet_servo_v2 import BrickletServoV2
 except:
     print("No tinkerforge Libs installed")
     exit
