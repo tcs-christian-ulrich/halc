@@ -160,6 +160,9 @@ class tfRelaisBricklet(hal.Relais):
         self.Device = tmp
         if self.Device.device_identifier == 26:
             self.Values = list(self.Device.get_state())
+        elif self.Device.device_identifier == 225:
+            tmp = self.Device.get_value() #int
+            self.Values = [False,False,False,False]
         else:
             self.Values = list(self.Device.get_value())
     def output(self,port,val):
@@ -167,6 +170,12 @@ class tfRelaisBricklet(hal.Relais):
         try:
             if self.Device.device_identifier == 26:
                 self.Device.set_state(self.Values[0],self.Values[1])
+            elif self.Device.device_identifier == 225:
+                tmp = 0
+                for port in range(4):
+                    if Values[port]:
+                        tmp = tmp | (1<<port)
+                self.Device.set_value(tmp)
             else:
                 self.Device.set_value(self.Values)
             return True
@@ -263,6 +272,7 @@ def cb_enumerate(uid, connected_uid, position, hardware_version, firmware_versio
                 tfColorSensor(uid,device_identifier,aParent)
         if device_identifier == 26\
         or device_identifier == 284\
+        or device_identifier == 225\
         or device_identifier == 2102:
             if hal.Devices.find(uid,tfRelaisBricklet) == None:
                 tfRelaisBricklet(uid,device_identifier,aParent)
