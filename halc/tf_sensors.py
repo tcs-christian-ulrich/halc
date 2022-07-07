@@ -37,6 +37,7 @@ def findDeviceType(id,devicetype):
         elif devicetype == 284: return BrickletIndustrialDualRelay(id, ipcon)
         elif devicetype == 225: return BrickletIndustrialQuadRelay(id, ipcon)
         elif devicetype == 2102: return BrickletIndustrialQuadRelayV2(id, ipcon)
+        elif devicetype == 2157: return BrickletServoV2(id, ipcon)
         else:
             print("Warning: DeviceType "+str(devicetype)+" not found")
             return None
@@ -64,15 +65,22 @@ class tfServoActor(hal.ServoActor):
     def Power(self,servo,BasePosition=None,Velocity=65535,Period=14248,on=True):
         hal.ServoActor.Power(self,servo,BasePosition,Velocity,Period,on)
         try:
-            self.Device.set_velocity(servo,Velocity)
+            if self.Device.device_identifier == 2157:
+                self.Device.set_motion_configuration(servo,Velocity,50000,50000)
+            else:
+                self.Device.set_velocity(servo,Velocity)
             self.Device.set_period(servo,Period)
             if BasePosition!=None:#only change Position during Power on, when BasePosition is set
                 self.Device.set_position(servo,self.ServoBasePosition[servo])
-            if on:
-                self.Device.enable(servo)
+            if self.Device.device_identifier == 2157:
+                self.Device.set_enable(servo,on)
+                return self.Device.get_enabled(servo)
             else:
-                self.Device.disable(servo)
-            return (on==False) or self.Device.is_enabled(servo)
+                if on:
+                    self.Device.enable(servo)
+                else:
+                    self.Device.disable(servo)
+                return (on==False) or self.Device.is_enabled(servo)
         except:
             return False
     def Position(self,servo,Position,Relative=True):
@@ -276,6 +284,9 @@ def cb_enumerate(uid, connected_uid, position, hardware_version, firmware_versio
         or device_identifier == 2102:
             if hal.Devices.find(uid,tfRelaisBricklet) == None:
                 tfRelaisBricklet(uid,device_identifier,aParent)
+        if device_identifier == 2157:
+            if hal.Devices.find(uid,tfRelaisBricklet) == None:
+                tfServoActor(uid,device_identifier,aParent)
       else:
         if device_identifier == 13: #Master
             if hal.Devices.find(uid,tfMasterBrick) == None:
