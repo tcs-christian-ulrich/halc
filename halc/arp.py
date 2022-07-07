@@ -3,7 +3,7 @@ import threading,time,subprocess
 class Enumerate(threading.Thread): 
     def run(self):
         global ip,iw
-        while threading.main_thread().isAlive():
+        while threading.main_thread().is_alive():
             try:
                 for dev in hal.Devices.Modules:
                     try:

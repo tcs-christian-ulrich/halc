@@ -41,9 +41,8 @@ class M28BYJ48(hal.StepperMotor,threading.Thread):
     running = False 
     position = 0
 
-    def __init__(self,id, gpio, pin1, pin2, pin3, pin4):
-        threading.Thread.__init__(self)
-        hal.StepperMotor.__init__(self,id)
+    def __init__(self,id, gpio, pin1, pin2, pin3, pin4,parent=None,UseThread=False,AutoEnable=True):
+        hal.StepperMotor.__init__(self,id,round(60/(self.NORMAL*self.REVOLUTION)),parent,AutoEnable=AutoEnable)
         self.pin1 = pin1
         self.pin2 = pin2
         self.pin3 = pin3
@@ -58,51 +57,59 @@ class M28BYJ48(hal.StepperMotor,threading.Thread):
         self.GPIO = gpio
         self.setFullStepDrive()
         self.GradPerStep = 360.0/self.REVOLUTION
-        return
+        self.UseThread = UseThread
+        if UseThread:
+            threading.Thread.__init__(self)
     # Initialise GPIO pins for this motor
     def Enable(self):
+        if self.Enabled: return
         self.GPIO.setup(self.pin1,'out')
         self.GPIO.setup(self.pin2,'out')
         self.GPIO.setup(self.pin3,'out')
         self.GPIO.setup(self.pin4,'out')
         self.position=0
-        self.start()
-        return	
+        if self.UseThread:
+            self.start()
+        self.Enabled = True	
     # Reset (stop) motor
     def Disable(self):
+        if not self.Enabled: return
         self.GPIO.output(self.pin1,0)
         self.GPIO.output(self.pin2,0)
         self.GPIO.output(self.pin3,0)
         self.GPIO.output(self.pin4,0)
         self.IsMoving = False
-        return	
+        self.Enabled = False
     # Turn the motor
     def Step(self,Steps,Direction):
         global CLOCKWISE
         self.IsMoving = True
-        self._steps = Steps	
-        self._direction = Direction	
-        return
+        self._steps = Steps
+        self._direction = Direction
+        while self._steps>0:
+            if self._direction == self.CLOCKWISE:
+                for pin in range(self._mrange):
+                    self.GPIO.output(self.pin1,self.out1[pin])
+                    self.GPIO.output(self.pin2,self.out2[pin])
+                    self.GPIO.output(self.pin3,self.out3[pin])
+                    self.GPIO.output(self.pin4,self.out4[pin])
+                    time.sleep(self.speed)
+                self._incrementPosition()
+            else:
+                for pin in reversed(range(self._mrange)):
+                    self.GPIO.output(self.pin1,self.out1[pin])
+                    self.GPIO.output(self.pin2,self.out2[pin])
+                    self.GPIO.output(self.pin3,self.out3[pin])
+                    self.GPIO.output(self.pin4,self.out4[pin])
+                    time.sleep(self.speed)
+                self._decrementPosition()
+            self._steps -= 1
+            hal.StepperMotor.Step(self,1,Direction)
+        return Steps*self._speed
     def run(self):
-        while threading.main_thread().isAlive():
+        while threading.main_thread().is_alive() and self.Enabled:
             if self._steps > 0:
-                if self._direction == self.CLOCKWISE:
-                    for pin in range(self._mrange):
-                        self.GPIO.output(self.pin1,self.out1[pin])
-                        self.GPIO.output(self.pin2,self.out2[pin])
-                        self.GPIO.output(self.pin3,self.out3[pin])
-                        self.GPIO.output(self.pin4,self.out4[pin])
-                        time.sleep(self.speed)
-                    self._incrementPosition()
-                else:
-                    for pin in reversed(range(self._mrange)):
-                        self.GPIO.output(self.pin1,self.out1[pin])
-                        self.GPIO.output(self.pin2,self.out2[pin])
-                        self.GPIO.output(self.pin3,self.out3[pin])
-                        self.GPIO.output(self.pin4,self.out4[pin])
-                        time.sleep(self.speed)
-                    self._decrementPosition()
-                self._steps -= 1
+                self.Step(self._steps,self._direction)
             elif self.IsMoving:
                 self.IsMoving = False
                 self.Disable()

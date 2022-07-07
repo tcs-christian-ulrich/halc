@@ -1,7 +1,7 @@
 from . import hal
 try: import rpyc
 except: print('RPyC is not installed')
-import threading,time
+import threading,time,logging
 class RPyCModules(hal.Proxy):
     def __init__(self, id, parent=None):
         self.Connect(id)
@@ -49,7 +49,7 @@ class Enumerate(threading.Thread):
         try:
             from rpyc.utils import registry
             registrar = registry.UDPRegistryClient()
-            while threading.main_thread().isAlive():
+            while threading.main_thread().is_alive():
                 try:
                     for dev in hal.Devices.Modules:
                         if isinstance(dev,RPyCModules):
@@ -63,7 +63,7 @@ class Enumerate(threading.Thread):
                                 dev = RPyCModules(ip)
                                 #print(ip,port)
                             except BaseException as e: 
-                                print(str(e))
+                                logging.debug(str(e))
                                 del(dev)
                         else:
                             adev.Found = True
@@ -71,10 +71,10 @@ class Enumerate(threading.Thread):
                         if isinstance(dev,RPyCModules):
                             if dev.Found == False:
                                 del(dev)
-                    time.sleep(1)
                 except BaseException as e: 
-                    print(str(e))
+                    logging.debug(str(e))
+                time.sleep(1)
         except BaseException as e:
-            print(str(e))
+            logging.debug(str(e))
 enumerate = Enumerate() 
 enumerate.start()

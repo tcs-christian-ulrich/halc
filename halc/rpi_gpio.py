@@ -1,26 +1,28 @@
 from . import hal
 import sys,logging,time
-try: import RPi.GPIO as GPIO
+try: import gpiozero
 except:logging.debug("GPio Lib not installed")
 class rpiGPIO(hal.GPIOActor):
     def __init__(self, id, parent=None):
         try:
-            GPIO.setmode(GPIO.BCM)
-            GPIO.setwarnings(False)
-            GPIO.setup(0,GPIO.IN)
-            GPIO.input(0)
             hal.GPIOActor.__init__(self,id,parent)
         except:
             pass
+        self.Pins = {}
     def setup(self,port,direction):
         try:
-            pin = self.getPin(port)
+            p = hal.GPIOActor.getPin(self,port)
+            if str(p) in self.Pins:
+                gpio = self.Pins[str(p)]
+                gpio.close()
+                self.Pins[str(p)] = None
             if direction == 'in':
-                GPIO.setup(pin,GPIO.IN)
+                self.Pins[str(p)] = gpiozero.DigitalInputDevice(p)
             if direction == 'out':
-                GPIO.setup(pin,GPIO.OUT)
+                self.Pins[str(p)] = gpiozero.DigitalOutputDevice(p)
             if direction == 'tristate':
-                GPIO.setup(pin,GPIO.IN)
+                self.Pins[str(p)] = gpiozero.DigitalInputDevice(p)
+            return True
         except BaseException as e:
             logging.debug("Exception:"+str(e))
             return False
@@ -28,16 +30,17 @@ class rpiGPIO(hal.GPIOActor):
         try:
             pin = self.getPin(port)
             if val > 0:
-                GPIO.output(pin,GPIO.HIGH)
+                self.Pins[str(pin)].on()
             else:
-                GPIO.output(pin,GPIO.LOW)
+                self.Pins[str(pin)].off()
         except BaseException as e:
             logging.debug("Exception:"+str(e))
             return False
     def input(self,port):
         try:
             pin = self.getPin(port)
-            return GPIO.input(pin)
+            inp = self.Pins[str(pin)]
+            return inp.value
         except BaseException as e:
             logging.debug("Exception:"+str(e))
-            return False
+            return None

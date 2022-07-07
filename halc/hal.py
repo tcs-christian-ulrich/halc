@@ -3,22 +3,44 @@ Devices = []
 class Module:
     """ Base Module Class, all other halc Classes are an Module
     """
-    def find(self,id=None,typ=None,Name=None):
+    def list(self,id=None,typ=None,Name=None,breakafterfound=False,unsharpname=None):
         """ With the find function you can search for Devices/Modules that are Childs of this Module
 
         just call it with an hardware id of the Module (mac adress, usb vid/pid ...) or an Name (can be set on your own some modules may support names that are avalible in the hardware (e.g. eeprom))
         or an device typ/class
         """
+        result = []
         for m in self.Modules:
-            if  ((id is None) or (m._id==id) or (id in m._id))\
+            nres = m.list(id,typ,Name)
+            for res in nres:
+                result.append(res)
+            if  ((id is None) or (m._id==id) or (unsharpname==True and (id in m._id)))\
             and ((typ is None) or (isinstance(m,typ)))\
-            and ((Name is None) or ((m.Name is not None) and ((m.Name == Name) or (Name in m.Name)))):
-                return m
-            else:
-                a = m.find(id,typ,Name)
-                if a!=None:
-                    return a
-        return None
+            and ((Name is None) or ((m.Name is not None) and ((m.Name == Name) or (unsharpname and (Name in m.Name))))):
+                result.append(m)
+                if breakafterfound:
+                    return result
+        return result
+    def find(self,id=None,typ=None,Name=None,unsharpname=None):
+        """ With the find function you can search for Devices/Modules that are Childs of this Module
+        just call it with an hardware id of the Module (mac adress, usb vid/pid ...) or an Name (can be set on your own some modules may support names that are avalible in the hardware (e.g. eeprom))
+        or an device typ/class
+        """
+        def iSearch(self,id=None,typ=None,Name=None,unsharpname=None):
+            for m in self.Modules:
+                if  ((id is None) or (m._id==id) or (unsharpname==True and (id in m._id)))\
+                and ((typ is None) or (isinstance(m,typ)))\
+                and ((Name is None) or ((m.Name is not None) and ((m.Name == Name) or (unsharpname==True and (Name in m.Name))))):
+                    return m
+                else:
+                    a = m.find(id,typ,Name)
+                    if a!=None:
+                        return a
+            return None
+        m = iSearch(self,id,typ,Name,unsharpname)
+        if m == None and unsharpname==None:
+            m = iSearch(self,id,typ,Name,True)
+        return m
     def __init__(self, id, parent=None):
         self._id = id
         try: self.Modules = []
@@ -30,7 +52,16 @@ class Module:
             parent = Devices
         if parent:
             parent.Modules.append(self)
+        self.parent = parent
         self.logger = logging.getLogger(type(self).__name__)
+        self.lock = threading.Lock()
+    def destroy(self):
+        try:
+            self.parent.Modules.remove(self)
+            del(self)
+        except: pass
+    def __del__(self):
+        self.destroy()
     def __str__(self):
         if self.Name is not None:
             ret = self.Name+' ('+str(self._id)+')'
@@ -75,18 +106,26 @@ class Video(Sensor):
     def __str__(self):
         return Module.__str__(self)
         self.Image = None
-    def read(self):
+    def read(self,CloseCapture = False):
         return None
-    def Capture(self):
+    def Capture(self,CloseCapture = False):
         """ Captures an single Frame
         """
-        return read(self)
+        return self.read(CloseCapture)
     def CaptureSequence(self,HandlerFunction):
         """Captures an sequence of images, the HandlerFunction is called for every ready frame
         """
         return False
     def Stop(self): 
         """ Stopps capturing the sequence
+        """
+        return False
+    def setResolution(width,height):
+        """ Sets the Capture Resolution to the nearest possible value
+        """
+        return False
+    def setFPS(FPS):
+        """ Sets the Framerate to Capture
         """
         return False
 class Camera(Video):pass
@@ -133,7 +172,7 @@ class VoltageSensor(ADC):
         self.measurements=measurements
         ADC.__init__(self,id,parent)
         self.Calibration = 0.0
-    def Voltage(self,Port=1):
+    def Voltage(self,Port=1,PortLow=2):
         return -1
     def Sample(self,Port=1):
         return self.Voltage(Port)
@@ -145,7 +184,7 @@ class CurrentSensor(Sensor):
         Sensor.__init__(self,id,parent)
         self.measurements=measurements
         self.Calibration = 0.0
-    def Current(self,Port=1):
+    def Current(self,Port=1,measurements=None):
         return -1
     def __str__(self):
         ret = Sensor.__str__(self)+' Current:'+str(self.Current())+' mA'
@@ -184,6 +223,7 @@ class MotorController(threading.Thread,Actor):
         self._steps = 0
     def add(self,Action):
         self.Actions.append(Action)
+        Action.Motor.Enable()
     def step(self):
         """ This function is the main function to work all actions, it is called by the controller loop. 
         
@@ -193,6 +233,8 @@ class MotorController(threading.Thread,Actor):
         if len(self.Actions) > 0:
             for Action in self.Actions:
                 if Action.Done():
+                    if Action.Motor.AutoEnable:
+                        Action.Motor.Disable()
                     self.Actions.remove(Action)
                     del(Action)
                 else:
@@ -217,7 +259,10 @@ class MotorAction:
         self.ValuePerStep = 1
         self.Position = 0
     def Step(self,Steps=1.0):
-        self.Position += Steps*self.ValuePerStep
+        if self.Value is None or self.Value-self.Position>0: #Direction
+            self.Position += Steps*self.ValuePerStep
+        else:
+            self.Position -= Steps*self.ValuePerStep
     def Done(self):
         if self.Position is not None and self.Value is not None:
             if self.Value > 0:
@@ -307,8 +352,8 @@ class RotationAxis(Axis):
         self.Offset = -((Max-Min)/2)
         LinearAxis.__init__(self,id,Motor,MotorController,Transmission,parent,self.Offset+Min,self.Offset+Max)
         self.Overflow = True
-    def Move(self,Value=None,Speed=None,Time=None,Acceleration=None):
-        if Value is not None:
+    def Move(self,Value=0,Speed=None,Time=None,Acceleration=None):
+        if Value != 0:
             LinearAxis.Move(self,Value+self.Offset,Speed,Time,Acceleration)
         else:
             LinearAxis.Move(self,None,Speed,Time,Acceleration)
@@ -316,7 +361,7 @@ class RotationAxis(Axis):
         Move(self,Value,Speed,Time,Acceleration)
     @property
     def Position(self):
-        return Axis.Position-(self.Max-self.Min)
+        return super().Position-(self.Max-self.Min)
     @Position.setter
     def Position(self, value):
         self.newPosition = value+(self.Max-self.Min)
@@ -325,21 +370,30 @@ class Motor(Actor):
     """
     CLOCKWISE = 0
     ANTICLOCKWISE = 1
-    def __init__(self, id, parent=None):
+    def __init__(self, id, parent=None,AutoEnable=True):
         Actor.__init__(self,id,parent)
         self.IsMoving = False
-    def Enable(self): pass
-    def Disable(self): pass
+        self.Enabled = False
+        self.AutoEnable = AutoEnable
+    def Enable(self): 
+        self.Enabled = True
+    def Disable(self): 
+        self.Enabled = False
 class StepperMotor(Motor):
-    def __init__(self, id, maxRPM=800, parent=None):
-        Motor.__init__(self,id,parent)
+    def __init__(self, id, maxRPM=800, parent=None,AutoEnable=True):
+        Motor.__init__(self,id,parent,AutoEnable=AutoEnable)
+        self.Position = 0
         self.GradPerStep = 1.8
         self.maxRPM = maxRPM
         self.Speed(self.maxRPM)
     def Speed(self,NewSpeed=-1):
         self.StepTime = (60/NewSpeed)/(360/self.GradPerStep)
         return 1/(self.StepTime*360)
-    def Step(self,Steps,Direction): pass
+    def Step(self,Steps,Direction):
+        if Direction==0:
+            self.Position += Steps*self.GradPerStep
+        else:
+            self.Position -= Steps*self.GradPerStep
     def Rotate(self,Grad):
         if Grad < 0:
             return self.Step(round(-(Grad)/self.GradPerStep),0)
@@ -410,7 +464,7 @@ class GPIOActor(Actor):
     def setName(self,port,Name):
         self.Names[Name] = port
     def getPin(self,port):
-        if isinstance(port, str): 
+        if isinstance(port, str) and port in self.Names: 
             pin = self.Names[port]
         else:
             pin = port
@@ -469,7 +523,7 @@ class NetworkPOESwitch(NetworkSwitch):
         """
 class ABBusController(BusController): pass
 Devices = Module('/')
-def EnsureDevice(typ,name=None,WaitTime=0):
+def EnsureDevice(typ,name=None,WaitTime=0,Errorcode=999):
     """Function to ensure (wait) for an Device or fails if the Device is not there within an given amount of time
     """
     WaitTime += 0.1
@@ -486,22 +540,22 @@ def EnsureDevice(typ,name=None,WaitTime=0):
             typname = typname[typname.find('.')+1:]
         if FirstSearch == True:
             if name is None:
-                logging.warning("**STEP 999 waiting for device "+typname)
+                logging.warning("**STEP "+str(Errorcode)+" waiting for device "+typname)
             else:
-                logging.warning("**STEP 999 waiting for device "+name)
+                logging.warning("**STEP "+str(Errorcode)+" waiting for device "+name)
             FirstSearch = False
         time.sleep(0.1)
         WaitTime-=0.1
     if dev == None:
         if name is None:
             if FirstSearch == False:
-                logging.warning("**ERROR "+typname+" not found")
+                logging.warning("**ERROR "+str(Errorcode)+" "+typname+" not found")
         else:
             if FirstSearch == False:
-                logging.error("**ERROR "+name+" not found")
+                logging.error("**ERROR "+str(Errorcode)+" "+name+" not found")
         return False
     if FirstSearch == False:
-        logging.warning("**STEPEND OK")
+        logging.warning("**STEPEND "+str(dev._id))
     return True
 def showTree():
     """ Shows the Device Tree as ASCII Tree

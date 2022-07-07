@@ -13,12 +13,14 @@ class  ALSAAudio(hal.Soundcard):
         else:
             return False
         vols = mixer.getvolume(alsaaudio.PCM_CAPTURE)
-        if channel is None:
-            for i in range(len(vols)):
-                mixer.setvolume(Volume,i,alsaaudio.PCM_CAPTURE)
-        else:
-            mixer.setvolume(Volume,channel,alsaaudio.PCM_CAPTURE)
-        return True
+        try:
+            if channel is None:
+                for i in range(len(vols)):
+                    mixer.setvolume(Volume,i,alsaaudio.PCM_CAPTURE)
+            else:
+                mixer.setvolume(Volume,channel,alsaaudio.PCM_CAPTURE)
+            return True
+        except: return False
     def SampleToWav(self,Filename,Time,SampleFormat='cd',Blocking=False):
         recparams = ['/usr/bin/arecord','-D','plug'+self.hw,'-f',SampleFormat,'-d','1','-r','44100',Filename]
         r=subprocess.Popen(recparams, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

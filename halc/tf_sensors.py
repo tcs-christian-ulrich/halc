@@ -7,11 +7,14 @@ try:
     from tinkerforge.brick_master import BrickMaster
     from tinkerforge.brick_servo import BrickServo
     from tinkerforge.bricklet_io16 import BrickletIO16
+    from tinkerforge.bricklet_io16_v2 import BrickletIO16V2
     from tinkerforge.bricklet_color import BrickletColor
     from tinkerforge.bricklet_color_v2 import BrickletColorV2
     from tinkerforge.bricklet_dual_relay import BrickletDualRelay
     from tinkerforge.bricklet_industrial_dual_relay import BrickletIndustrialDualRelay
     from tinkerforge.bricklet_industrial_quad_relay_v2 import BrickletIndustrialQuadRelayV2
+    from tinkerforge.bricklet_industrial_quad_relay import BrickletIndustrialQuadRelay
+    from tinkerforge.bricklet_servo_v2 import BrickletServoV2
 except:
     print("No tinkerforge Libs installed")
     exit
@@ -26,7 +29,8 @@ def findDeviceType(id,devicetype):
         elif devicetype == 14: return BrickServo(id, ipcon)
         elif devicetype == 227: return BrickletVoltageCurrent(id, ipcon)
         elif devicetype == 2105: return BrickletVoltageCurrentV2(id, ipcon)
-        elif devicetype == 100: return BrickletIO16(id, ipcon)
+        elif devicetype == 28: return BrickletIO16(id, ipcon)
+        elif devicetype == 2114: return BrickletIO16V2(id, ipcon)
         elif devicetype == 243: return BrickletColor(id, ipcon)
         elif devicetype == 2128: return BrickletColorV2(id, ipcon)
         elif devicetype == 26: return BrickletDualRelay(id, ipcon)
@@ -35,6 +39,7 @@ def findDeviceType(id,devicetype):
         elif devicetype == 2102: return BrickletIndustrialQuadRelayV2(id, ipcon)
         else:
             print("Warning: DeviceType "+str(devicetype)+" not found")
+            return None
 class tfMasterBrick(hal.Module):
     def __init__(self, id, devicetype, parent=None):
         tmp = findDeviceType(id,devicetype)
@@ -124,9 +129,11 @@ class tfCurrentSensor(hal.CurrentSensor):
         self.Device = tmp
         #                      4,1.1ms  ,332us
         self.Device.set_configuration(BrickletVoltageCurrent.AVERAGING_4,4      ,3    )
-    def Current(self,Port=1):
+    def Current(self,Port=1,measurements=None):
         if not self.measurements:
             self.measurements = 1
+        if measurements!=None:
+            self.measurements=measurements
         try:
             max_curr = 0
             for x in range(self.measurements):
@@ -153,6 +160,9 @@ class tfRelaisBricklet(hal.Relais):
         self.Device = tmp
         if self.Device.device_identifier == 26:
             self.Values = list(self.Device.get_state())
+        elif self.Device.device_identifier == 225:
+            tmp = self.Device.get_value() #int
+            self.Values = [False,False,False,False]
         else:
             self.Values = list(self.Device.get_value())
     def output(self,port,val):
@@ -160,6 +170,12 @@ class tfRelaisBricklet(hal.Relais):
         try:
             if self.Device.device_identifier == 26:
                 self.Device.set_state(self.Values[0],self.Values[1])
+            elif self.Device.device_identifier == 225:
+                tmp = 0
+                for port in range(4):
+                    if Values[port]:
+                        tmp = tmp | (1<<port)
+                self.Device.set_value(tmp)
             else:
                 self.Device.set_value(self.Values)
             return True
@@ -171,6 +187,65 @@ class tfRelaisBricklet(hal.Relais):
             return  ret
         except:
             return hal.Sensor.__str__(self)
+class tfIOBricklet(hal.GPIOActor):
+    def __init__(self, id, devicetype, parent=None):
+        tmp = findDeviceType(id,devicetype)
+        hal.Actor.__init__(self,id,parent)
+        self.Device = tmp
+    def setup(self,port,direction):
+        port = self.getPin(port)
+        if direction == 'in':
+            if type(self.Device) is BrickletIO16:
+                if port < 8:
+                    tmp = self.Device.get_port_configuration('a').direction_mask
+                    tmp = tmp | (1<<port)
+                    self.Device.set_port_configuration('a',tmp,'i',True)
+                else:
+                    tmp = self.Device.get_port_configuration('b').direction_mask
+                    tmp = tmp | (1<<(port-8))
+                    self.Device.set_port_configuration('b',tmp,'i',True)
+            else:
+                self.Device.set_configuration(port,'i',True)
+        if direction == 'out':
+            if type(self.Device) is BrickletIO16:
+                if port < 8:
+                    tmp = self.Device.get_port_configuration('a').direction_mask ^ 0xFF
+                    tmp = tmp | (1<<port)
+                    self.Device.set_port_configuration('a',tmp,'o',False)
+                else:
+                    tmp = self.Device.get_port_configuration('b').direction_mask ^ 0xFF
+                    tmp = tmp | (1<<(port-8))
+                    self.Device.set_port_configuration('b',tmp,'o',False)
+            else:
+                self.Device.set_configuration(port,'o',False)
+        if direction == 'tristate':
+            if type(self.Device) is BrickletIO16:
+                if port < 8:
+                    tmp = self.Device.get_port_configuration('a').direction_mask
+                    tmp = tmp | (1<<port)
+                    self.Device.set_port_configuration('a',tmp,'i',False)
+                else:
+                    tmp = self.Device.get_port_configuration('b').direction_mask
+                    tmp = tmp | (1<<(port-8))
+                    self.Device.set_port_configuration('b',tmp,'i',False)
+            else:
+                self.Device.set_configuration(port,'i',False)
+    def output(self,port,val):
+        port = self.getPin(port)
+        if val:
+            val = 1
+        else:
+            val = 0
+        if type(self.Device) is BrickletIO16:
+            if port < 8:
+                self.Device.set_selected_values('a',(1<<port),(val<<port))
+            else:
+                self.Device.set_selected_values('b',(1<<(port-8)),(val<<(port-8)))
+        else:
+            self.Device.set_selected_value(port,val)
+    def input(self,port):
+        port = self.getPin(port)
+        return self.Device.get_value()[port]
 def cb_enumerate(uid, connected_uid, position, hardware_version, firmware_version,device_identifier, enumeration_type):# Register incoming enumeration
    #print("cb_enumerate():",uid, connected_uid, position, hardware_version, firmware_version ,device_identifier)
    if enumeration_type == IPConnection.ENUMERATION_TYPE_DISCONNECTED:
@@ -188,14 +263,16 @@ def cb_enumerate(uid, connected_uid, position, hardware_version, firmware_versio
             if hal.Devices.find(uid,hal.VoltageSensor) == None:
                 tfVoltageSensor(uid,device_identifier,aParent)
                 tfCurrentSensor(uid,device_identifier,aParent)
-        if device_identifier == 100: #io16 Bricklet
-            if hal.Devices.find(uid,hal.IOPort) == None:
-                tfIOPort(uid,device_identifier,aParent)
+        if device_identifier == 28\
+        or device_identifier == 2114: #io16 Bricklet
+            if hal.Devices.find(uid,tfIOBricklet) == None:
+                tfIOBricklet(uid,device_identifier,aParent)
         if device_identifier == 243 or device_identifier == 2128: #Color Bricklet
             if hal.Devices.find(uid,hal.ColorSensor) == None:
                 tfColorSensor(uid,device_identifier,aParent)
         if device_identifier == 26\
         or device_identifier == 284\
+        or device_identifier == 225\
         or device_identifier == 2102:
             if hal.Devices.find(uid,tfRelaisBricklet) == None:
                 tfRelaisBricklet(uid,device_identifier,aParent)
