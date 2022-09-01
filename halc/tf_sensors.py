@@ -154,13 +154,15 @@ class tfCurrentSensor(hal.CurrentSensor):
         av_curr = round(float(max_curr)/self.measurements,4)
         #print('Time:',(time.time() - start)*1000)# = ca50ms
         return float(av_curr-self.Calibration)
-class tfColorSensor(hal.ColorSensor):
+class tfColorSensor(hal.ColorSensor,hal.IlluminanceSensor):
     def __init__(self, id, devicetype, parent=None):
         tmp = findDeviceType(id,devicetype)
         hal.Sensor.__init__(self,id,parent)
         self.Device = tmp
     def Color(self,Port=1):
         return self.Device.get_color()
+    def Illuminance(self, Port=1):
+        return self.Device.get_illuminance(),'lux'
 class tfRelaisBricklet(hal.Relais):
     def __init__(self, id, devicetype, parent=None):
         tmp = findDeviceType(id,devicetype)

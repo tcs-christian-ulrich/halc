@@ -196,6 +196,13 @@ class ColorSensor(Sensor):
         r,g,b,a = self.Color()
         ret = str(self._id)+' Color:'+str(r)+','+str(g)+','+str(b)+','+str(a)+','+' RGBA'
         return  ret
+class IlluminanceSensor(Sensor):
+    def Illuminance(self,Port=1):
+        return -1,'lux' #Hue,Unit
+    def __str__(self):
+        val,unit = self.Illuminance()
+        ret = str(self._id)+' Illuminance:'+str(val)+' '+str(unit)
+        return  ret
 class MotorController(threading.Thread,Actor):
     """ The MotorController drives Motors and Axes threaded 
 
