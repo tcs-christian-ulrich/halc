@@ -289,6 +289,8 @@ def cb_enumerate(uid, connected_uid, position, hardware_version, firmware_versio
         if device_identifier == 2157:
             if hal.Devices.find(uid,tfRelaisBricklet) == None:
                 tfServoActor(uid,device_identifier,aParent)
+                sc = tfServoCurrentSensor(uid,device_identifier,parent=sb)
+                sc.Name = 'servo'
       else:
         if device_identifier == 13: #Master
             if hal.Devices.find(uid,tfMasterBrick) == None:
