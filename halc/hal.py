@@ -174,8 +174,8 @@ class VoltageSensor(ADC):
         self.Calibration = 0.0
     def Voltage(self,Port=1,PortLow=2):
         return -1
-    def Sample(self,Port=1):
-        return self.Voltage(Port)
+    def Sample(self,Port=1,PortLow=2):
+        return self.Voltage(Port,PortLow)
     def __str__(self):
         ret = Sensor.__str__(self)+' Voltage:'+str(self.Voltage())+' V'
         return  ret

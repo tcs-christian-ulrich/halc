@@ -126,7 +126,7 @@ class tfVoltageSensor(hal.VoltageSensor):
         hal.Sensor.__init__(self,id,parent)
         self.Calibration = 0.0
         self.Device = tmp
-    def Voltage(self,Port=1):
+    def Voltage(self,Port=1,PortLow=2):
         return float((self.Device.get_voltage()/1000)-self.Calibration)
 class tfCurrentSensor(hal.CurrentSensor):
     def __init__(self, id, devicetype, parent=None,measurements=25):
