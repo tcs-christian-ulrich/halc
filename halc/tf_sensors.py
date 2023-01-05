@@ -121,24 +121,44 @@ class tfServoCurrentSensor(hal.CurrentSensor):
         except:
             return -1
 class tfVoltageSensor(hal.VoltageSensor):
-    def __init__(self, id, devicetype, parent=None):
+    def __init__(self, id, devicetype, parent=None,measurements=1):
         tmp = findDeviceType(id,devicetype)
+        self.measurements=measurements
         hal.Sensor.__init__(self,id,parent)
         self.Calibration = 0.0
         self.Device = tmp
         #                      4,1.1ms  ,332us
         self.Device.set_configuration(BrickletVoltageCurrent.AVERAGING_4,4      ,3    )
-    def Voltage(self,Port=1,PortLow=2):
-        return float((self.Device.get_voltage()/1000)-self.Calibration)
+        self.last_value = None
+    def Voltage(self,Port=1,PortLow=2,measurements=None):
+        if not self.measurements:
+            self.measurements = 1
+        if measurements!=None:
+            self.measurements=measurements
+        try:
+            max_v = 0
+            for x in range(self.measurements):
+                self.last_value = self.Device.get_voltage()
+                max_v = max_v+self.last_value
+            if max_v == self.last_value:
+                self.Device.reset()
+                raise Exception('exact same value read')
+        except:
+            max_v = 0
+            for x in range(self.measurements):
+                max_v = max_v+self.Device.get_voltage()
+        av_v = round(float(max_v)/self.measurements,4)
+        return float((max_v/1000)-self.Calibration)
 class tfCurrentSensor(hal.CurrentSensor):
-    def __init__(self, id, devicetype, parent=None,measurements=25):
+    def __init__(self, id, devicetype, parent=None,measurements=1):
         tmp = findDeviceType(id,devicetype)
-        self.measurements=1
+        self.measurements=measurements
         hal.CurrentSensor.__init__(self,id,parent,measurements)
         self.Device = tmp
         self.Device = tmp
         #                      4,1.1ms  ,332us
         self.Device.set_configuration(BrickletVoltageCurrent.AVERAGING_4,4      ,3    )
+        self.last_value = None
     def Current(self,Port=1,measurements=None):
         if not self.measurements:
             self.measurements = 1
@@ -147,7 +167,11 @@ class tfCurrentSensor(hal.CurrentSensor):
         try:
             max_curr = 0
             for x in range(self.measurements):
-                max_curr = max_curr+self.Device.get_current()
+                self.last_value = self.Device.get_current()
+                max_curr = max_curr+self.last_value
+            if max_curr == self.last_value:
+                self.Device.reset()
+                raise Exception('exact same value read')
         except:
             self.Device.set_configuration(BrickletVoltageCurrent.AVERAGING_4,4      ,3    )
             max_curr = 0
