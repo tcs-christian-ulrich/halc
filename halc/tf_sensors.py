@@ -53,6 +53,11 @@ class tfServoBrick(hal.Module):
         tmp = findDeviceType(id,devicetype)
         hal.Module.__init__(self,id,parent)
         self.Device = tmp
+class tfUnknownBricklet(hal.Module):
+    def __init__(self, id, devicetype, parent=None):
+        tmp = findDeviceType(id,devicetype)
+        hal.Module.__init__(self,id,parent)
+        self.Device = tmp
 class tfServoActor(hal.ServoActor):
     def __init__(self, id, devicetype, parent=None):
         tmp = findDeviceType(id,devicetype)
@@ -283,7 +288,7 @@ class tfIOBricklet(hal.GPIOActor):
         port = self.getPin(port)
         return self.Device.get_value()[port]
 def cb_enumerate(uid, connected_uid, position, hardware_version, firmware_version,device_identifier, enumeration_type):# Register incoming enumeration
-   #print("cb_enumerate():",uid, connected_uid, position, hardware_version, firmware_version ,device_identifier)
+   logging.info("cb_enumerate(): %s %s %s %s %s %d" % (uid, connected_uid, position, str(hardware_version), str(firmware_version) ,device_identifier))
    if enumeration_type == IPConnection.ENUMERATION_TYPE_DISCONNECTED:
       #print("cb_enumerate().Disconnected: " + str(enumeration_type) + " UID: " + uid+" DID: "+str(device_identifier))
       aSensor = hal.Devices.find(uid)
@@ -317,6 +322,9 @@ def cb_enumerate(uid, connected_uid, position, hardware_version, firmware_versio
                 sb = tfServoActor(uid,device_identifier,aParent)
                 sc = tfServoCurrentSensor(uid,device_identifier,parent=sb)
                 sc.Name = 'servo'
+        else:
+            if hal.Devices.find(uid) == None:
+                tfUnknownBricklet(uid,device_identifier,aParent)
       else:
         if device_identifier == 13: #Master
             if hal.Devices.find(uid,tfMasterBrick) == None:
