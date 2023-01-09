@@ -72,6 +72,7 @@ class Proxy(Module): pass
 class Sensor(Module):
     """ Base class for all Sensors
     """
+    def Init(self): pass
     def __str__(self):
         return Module.__str__(self)
 class Actor(Module):

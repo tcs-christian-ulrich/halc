@@ -135,6 +135,11 @@ class tfVoltageSensor(hal.VoltageSensor):
         #                      4,1.1ms  ,332us
         self.Device.set_configuration(BrickletVoltageCurrent.AVERAGING_1,4      ,3    )
         self.last_value = None
+    def Init(self):
+        try:
+            self.Device.reset()
+        except BaseException as e:
+            self.logger.warn('Init failed:'+str(e))
     def Voltage(self,Port=1,PortLow=2,measurements=None):
         if not self.measurements:
             self.measurements = 1
@@ -164,6 +169,11 @@ class tfCurrentSensor(hal.CurrentSensor):
         #                      4,1.1ms  ,332us
         self.Device.set_configuration(BrickletVoltageCurrent.AVERAGING_4,4      ,3    )
         self.last_value = None
+    def Init(self):
+        try:
+            self.Device.reset()
+        except BaseException as e:
+            self.logger.warn('Init failed:'+str(e))
     def Current(self,Port=1,measurements=None):
         if not self.measurements:
             self.measurements = 1
