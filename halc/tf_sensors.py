@@ -126,14 +126,14 @@ class tfServoCurrentSensor(hal.CurrentSensor):
         except:
             return -1
 class tfVoltageSensor(hal.VoltageSensor):
-    def __init__(self, id, devicetype, parent=None,measurements=4):
+    def __init__(self, id, devicetype, parent=None,measurements=1):
         tmp = findDeviceType(id,devicetype)
         self.measurements=measurements
         hal.Sensor.__init__(self,id,parent)
         self.Calibration = 0.0
         self.Device = tmp
         #                      4,1.1ms  ,332us
-        self.Device.set_configuration(BrickletVoltageCurrent.AVERAGING_1,4      ,3    )
+        self.Device.set_configuration(BrickletVoltageCurrent.AVERAGING_4,4      ,3    )
         self.last_value = None
     def Init(self):
         try:
