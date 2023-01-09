@@ -145,7 +145,7 @@ class tfVoltageSensor(hal.VoltageSensor):
             for x in range(self.measurements):
                 self.last_value = self.Device.get_voltage()
                 max_v = max_v+self.last_value
-            if (float(max_v)/self.measurements) == self.last_value:
+            if (float(max_v)/self.measurements) == self.last_value and self.last_value != 0:
                 self.Device.reset()
                 raise Exception('exact same value read')
         except:
@@ -174,7 +174,7 @@ class tfCurrentSensor(hal.CurrentSensor):
             for x in range(self.measurements):
                 self.last_value = self.Device.get_current()
                 max_curr = max_curr+self.last_value
-            if (float(max_curr)/self.measurements) == self.last_value:
+            if (float(max_curr)/self.measurements) == self.last_value and self.last_value != 0:
                 self.Device.reset()
                 raise Exception('exact same value read')
         except:
