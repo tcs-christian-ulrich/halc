@@ -137,9 +137,10 @@ class tfVoltageSensor(hal.VoltageSensor):
         self.last_value = None
     def Init(self):
         try:
-            self.Device.reset()
+            if hasattr(self.Device,'reset'):
+                self.Device.reset()
         except BaseException as e:
-            self.logger.warn('Init failed:'+str(e))
+            self.logger.debug('Init failed:'+str(e))
     def Voltage(self,Port=1,PortLow=2,measurements=None):
         if not self.measurements:
             self.measurements = 1
