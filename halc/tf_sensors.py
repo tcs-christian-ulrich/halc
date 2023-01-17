@@ -299,7 +299,7 @@ class tfIOBricklet(hal.GPIOActor):
         port = self.getPin(port)
         return self.Device.get_value()[port]
 def cb_enumerate(uid, connected_uid, position, hardware_version, firmware_version,device_identifier, enumeration_type):# Register incoming enumeration
-   logging.info("cb_enumerate(): %s %s %s %s %s %d" % (uid, connected_uid, position, str(hardware_version), str(firmware_version) ,device_identifier))
+   logging.debug("cb_enumerate(): %s %s %s %s %s %d" % (uid, connected_uid, position, str(hardware_version), str(firmware_version) ,device_identifier))
    if enumeration_type == IPConnection.ENUMERATION_TYPE_DISCONNECTED:
       #print("cb_enumerate().Disconnected: " + str(enumeration_type) + " UID: " + uid+" DID: "+str(device_identifier))
       aSensor = hal.Devices.find(uid)
