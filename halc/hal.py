@@ -50,7 +50,7 @@ class Module:
         self.Found = True
         if parent == None:
             parent = Devices
-        if parent:
+        if parent and not self in parent.Modules:
             parent.Modules.append(self)
         self.parent = parent
         self.logger = logging.getLogger(type(self).__name__)
