@@ -149,6 +149,8 @@ class AccessPoint(hal.NetworkSwitch,pyaccesspoint.AccessPoint):
         # s = 'hostapd -B ' + os.path.abspath('run.conf')
         s = 'sudo hostapd -B {}'.format(self.hostapd_config_path)
         logging.debug(s)
+        logging.debug('killing hostapd')
+        self._execute_shell('sudo killall hostapd')
         logging.debug('running hostapd')
         logging.debug('wait..')
         self._execute_shell('sleep 2')
