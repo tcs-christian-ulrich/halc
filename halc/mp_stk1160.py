@@ -44,7 +44,7 @@ class mpEnumerate(threading.Thread):
                         if adev == None:
                             if dev.get('ID_USB_DRIVER').lower() == 'stk1160':
                                 cam = MPCamera(i,Name=dev.get('ID_MODEL'),width=768,height=576)
-                            elif dev.get('ID_USB_DRIVER').lower() == 'uncvideo':
+                            elif dev.get('ID_USB_DRIVER').lower() == 'uvcvideo':
                                 cam = MPCamera(i,Name=dev.get('ID_MODEL'),width=720,height=480)
                         else:
                             adev.Found = True
