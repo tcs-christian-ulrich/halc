@@ -1,15 +1,18 @@
 from . import hal
 import time,json,threading,numpy as np,os,logging,pyudev,usb.core,cv2
 class MPCamera(hal.Grabber):
-    def __init__(self, port=-1, parent=None,Name=None):
+    def __init__(self, port=-1, parent=None,Name=None,width=768,height=576,fps=25):
         if port == -1:
             hal.Grabber.__init__(self,'default',parent)
         else:
             hal.Grabber.__init__(self,str(port),parent)
         self.Port = port
         self.Name = Name
+        self.width = width
+        self.height = height
+        self.fps = fps
     def capture(self,dev,CloseCapture = False):
-        os.system("mplayer tv:// -tv driver=v4l2:device=/dev/video"+str(self.Port)+":norm=PAL:width=768:height=576:fps=25 -hardframedrop -rawvideo pal -vf pp=lb -frames 1 -vo png")
+        os.system("mplayer tv:// -tv driver=v4l2:device=/dev/video"+str(self.Port)+":norm=PAL:width="+str(self.width)+":height="+str(self.height)+":fps="+str(self.fps)+" -hardframedrop -rawvideo pal -vf pp=lb -frames 1 -vo png")
         img = cv2.imread("00000001.png")
         if self.logger.getEffectiveLevel() < logging.DEBUG:
             os.remove("00000001.png")
@@ -40,7 +43,9 @@ class mpEnumerate(threading.Thread):
                         adev = hal.Devices.find('/dev/video'+str(i),hal.Video)
                         if adev == None:
                             if dev.get('ID_USB_DRIVER').lower() == 'stk1160':
-                                cam = MPCamera(i,Name=dev.get('ID_MODEL'))
+                                cam = MPCamera(i,Name=dev.get('ID_MODEL'),width=768,height=576)
+                            elif dev.get('ID_USB_DRIVER').lower() == 'uncvideo':
+                                cam = MPCamera(i,Name=dev.get('ID_MODEL'),width=720,height=480)
                         else:
                             adev.Found = True
                 except:
